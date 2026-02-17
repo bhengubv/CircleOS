@@ -1,0 +1,93 @@
+name: CircleOS Build
+
+on:
+  push:
+    branches: [ main, circle-14.0 ]
+  pull_request:
+    branches: [ main, circle-14.0 ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build circle_arm64-userdebug
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+
+    steps:
+      - name: System info
+        run: |
+          echo "CPU cores: $(nproc)"
+          echo "RAM: $(free -h | awk '/^Mem:/{print $2}')"
+          df -h /
+
+      - name: Install AOSP build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            git-core gnupg flex bison build-essential zip curl \
+            zlib1g-dev libc6-dev-i386 libncurses5 lib32ncurses5-dev \
+            x11proto-core-dev libx11-dev lib32z1-dev libgl1-mesa-dev \
+            libxml2-utils xsltproc unzip fontconfig python3 python3-pip \
+            libssl-dev lzop bc rsync openjdk-21-jdk
+
+      - name: Configure git
+        run: |
+          git config --global user.email "ci@circleos.org"
+          git config --global user.name "CircleOS CI"
+          git config --global color.ui false
+
+      - name: Initialise repo tool
+        run: |
+          mkdir -p ~/.local/bin
+          curl -s https://storage.googleapis.com/git-repo-downloads/repo \
+            -o ~/.local/bin/repo
+          chmod a+x ~/.local/bin/repo
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Sync AOSP + Circle sources
+        run: |
+          mkdir -p aosp && cd aosp
+          repo init \
+            -u https://android.googlesource.com/platform/manifest \
+            -b android-14.0.0_r50 \
+            --depth=1 \
+            --no-clone-bundle
+          # Apply Circle local manifest
+          mkdir -p .repo/local_manifests
+          cp $GITHUB_WORKSPACE/aosp/.repo/local_manifests/circle.xml \
+             .repo/local_manifests/circle.xml
+          repo sync -j$(nproc) --fail-fast --no-clone-bundle --no-tags
+
+      - name: Restore build cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: ccache-circle-arm64-${{ github.sha }}
+          restore-keys: |
+            ccache-circle-arm64-
+
+      - name: Configure ccache
+        run: |
+          sudo apt-get install -y ccache
+          ccache --max-size=10G
+          echo "CCACHE_DIR=$HOME/.ccache" >> $GITHUB_ENV
+          echo "USE_CCACHE=1"             >> $GITHUB_ENV
+
+      - name: Build
+        working-directory: aosp
+        run: |
+          source build/envsetup.sh
+          lunch circle_arm64-userdebug
+          make -j$(nproc) \
+            CCACHE_DIR=$HOME/.ccache \
+            USE_CCACHE=1
+
+      - name: Upload system image
+        uses: actions/upload-artifact@v4
+        with:
+          name: circle-arm64-userdebug-${{ github.run_number }}
+          path: |
+            aosp/out/target/product/circle_arm64/system.img
+            aosp/out/target/product/circle_arm64/vendor.img
+            aosp/out/target/product/circle_arm64/boot.img
+          retention-days: 7
