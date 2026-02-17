@@ -1,0 +1,51 @@
+name: CircleOS Verify
+
+on:
+  workflow_run:
+    workflows: [ "CircleOS Build" ]
+    types: [ completed ]
+  workflow_dispatch:
+
+jobs:
+  verify:
+    name: Verify on emulator
+    runs-on: ubuntu-22.04
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: circle-arm64-userdebug-${{ github.event.workflow_run.run_number }}
+          path: images/
+
+      - name: Set up Android SDK + emulator
+        uses: android-actions/setup-android@v3
+
+      - name: Boot emulator with Circle images
+        run: |
+          emulator -avd circle_test \
+            -system images/system.img \
+            -no-window -no-audio -gpu swiftshader_indirect \
+            -wipe-data &
+          # Wait for full boot
+          adb wait-for-device
+          timeout 300 bash -c \
+            'until adb shell getprop sys.boot_completed 2>/dev/null | grep -q 1; do sleep 5; done'
+          echo "Emulator booted"
+
+      - name: Run verification script
+        run: |
+          chmod +x vendor/circle/scripts/verify_build.sh
+          ./vendor/circle/scripts/verify_build.sh
+
+      - name: Upload verification log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-log-${{ github.run_number }}
+          path: verify_output.txt
