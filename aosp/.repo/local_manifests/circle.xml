@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Circle OS Local Manifest - Phase 3
+    Circle OS Local Manifest - Phase 5
 
-    Current Phase: Phase 3 - UI, Build System, VPN Filter, Threat Intel
+    Current Phase: Phase 5 - Notification/Clipboard Privacy, DoH, Analytics,
+                             Backup, Camera/Mic Indicators, Device Targets
+    Minimum Device: Xiaomi Redmi Note 12 (SM6225 / sky)
+    Reference Device: Google Pixel 6 (GS101 / oriole)
     Remote: https://github.com/bhengubv (CircleOS GitHub org)
 -->
 <manifest>
@@ -54,6 +57,28 @@
     <!-- CircleLauncher: privacy-first home screen with network monitor widget -->
     <project path="packages/apps/CircleLauncher"
              name="CircleOS_packages_apps_CircleLauncher"
+             remote="circle"
+             revision="main" />
+
+    <!-- ============================================================ -->
+    <!-- DEVICE TREES                                                 -->
+    <!-- ============================================================ -->
+
+    <!-- Xiaomi Redmi Note 12 (SM6225/sky) — minimum supported device -->
+    <project path="device/circle/redmi_note12"
+             name="CircleOS_device_circle_redmi_note12"
+             remote="circle"
+             revision="main" />
+
+    <!-- Google Pixel 6 (GS101/oriole) — flagship reference device -->
+    <project path="device/circle/pixel6"
+             name="CircleOS_device_circle_pixel6"
+             remote="circle"
+             revision="main" />
+
+    <!-- Kernel: Xiaomi SM6225 (Snapdragon 685) -->
+    <project path="kernel/xiaomi/sm6225"
+             name="CircleOS_kernel_xiaomi_sm6225"
              remote="circle"
              revision="main" />
 
