@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Circle OS Local Manifest - Phase 1+
+    Circle OS Local Manifest - Phase 3
 
-    Activates Circle OS repositories so `repo sync` fetches Circle forks
-    of frameworks/base, build/make, and packages/apps/Settings.
-
-    Current Phase: Phase 1 - Build Foundation + Privacy Framework
+    Current Phase: Phase 3 - UI, Build System, VPN Filter, Threat Intel
     Remote: https://github.com/bhengubv (CircleOS GitHub org)
 -->
 <manifest>
@@ -19,30 +16,22 @@
     <!-- Replace AOSP projects with Circle forks on circle-14.0       -->
     <!-- ============================================================ -->
 
-    <!-- frameworks/base: contains CircleOS privacy services and AIDL -->
+    <!-- frameworks/base: privacy services, AIDL, fake response, VPN filter -->
     <remove-project name="platform/frameworks/base" />
     <project path="frameworks/base"
              name="CircleOS_platform_frameworks_base"
              remote="circle"
              revision="circle-14.0" />
 
-    <!-- build/make: Circle build targets and lunch combos -->
-    <remove-project name="platform/build" />
-    <project path="build/make"
-             name="CircleOS_build_make"
-             remote="circle"
-             revision="circle-14.0" />
-
-    <!-- Settings: CircleSettings privacy dashboard -->
-    <remove-project name="platform/packages/apps/Settings" />
-    <project path="packages/apps/Settings"
-             name="CircleOS_packages_apps_Settings"
-             remote="circle"
-             revision="circle-14.0" />
-
     <!-- ============================================================ -->
     <!-- CIRCLE OS ADDITIONS (no AOSP project to remove)              -->
     <!-- ============================================================ -->
+
+    <!-- Build system: lunch targets, product configs, vendorsetup.sh -->
+    <project path="build/circle"
+             name="CircleOS_build"
+             remote="circle"
+             revision="main" />
 
     <!-- Vendor overlay: Circle properties, packages, SELinux policy -->
     <project path="vendor/circle"
@@ -53,6 +42,12 @@
     <!-- Device common: base device tree for Circle hardware targets -->
     <project path="device/circle/common"
              name="CircleOS_device_circle_common"
+             remote="circle"
+             revision="main" />
+
+    <!-- CircleSettings: privacy dashboard, setup wizard, permission dialogs -->
+    <project path="packages/apps/CircleSettings"
+             name="CircleOS_packages_apps_CircleSettings"
              remote="circle"
              revision="main" />
 
