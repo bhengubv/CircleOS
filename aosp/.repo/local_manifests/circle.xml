@@ -51,4 +51,10 @@
              remote="circle"
              revision="main" />
 
+    <!-- CircleLauncher: privacy-first home screen with network monitor widget -->
+    <project path="packages/apps/CircleLauncher"
+             name="CircleOS_packages_apps_CircleLauncher"
+             remote="circle"
+             revision="main" />
+
 </manifest>
