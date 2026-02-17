@@ -34,7 +34,7 @@ The Inference Service is the shared system backend. Butler is the primary user-f
 | Phase | Description | Status |
 |-------|-------------|--------|
 | **Inf Phase 1** | Foundation — AIDL, Parcelables, CircleInferenceService, CapabilityDetector, ModelManager, LlamaCppBackend (JNI stub), SystemServer + Manifest | ✅ Done — commit `52217a0d` |
-| **Inf Phase 2** | Rust abstraction layer — `InferenceBackend` trait, JNI bridge Java→Rust, ResourceGovernor, ModelManager download support | ⬜ Todo |
+| | **Inf Phase 2** | Rust abstraction layer — `InferenceBackend` trait, JNI bridge Java→Rust, ResourceGovernor, ModelManager download support | ✅ Done — commit `ca39f5a6` |
 | **Inf Phase 3** | BitNet integration — BitNetBackend, backend auto-selection logic, performance benchmarking | ⬜ Todo |
 | **Inf Phase 4** | Ecosystem — Butler app integration, SDPKT + other Geek Network apps, third-party docs, model store | ⬜ Todo |
 
