@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Circle OS Local Manifest - Phase 1+
+
+    Activates Circle OS repositories so `repo sync` fetches Circle forks
+    of frameworks/base, build/make, and packages/apps/Settings.
+
+    Current Phase: Phase 1 - Build Foundation + Privacy Framework
+    Remote: https://github.com/bhengubv (CircleOS GitHub org)
+-->
+<manifest>
+    <!-- Circle OS Remote -->
+    <remote name="circle"
+            fetch="https://github.com/bhengubv"
+            revision="circle-14.0" />
+
+    <!-- ============================================================ -->
+    <!-- CIRCLE OS CORE OVERRIDES                                     -->
+    <!-- Replace AOSP projects with Circle forks on circle-14.0       -->
+    <!-- ============================================================ -->
+
+    <!-- frameworks/base: contains CircleOS privacy services and AIDL -->
+    <remove-project name="platform/frameworks/base" />
+    <project path="frameworks/base"
+             name="CircleOS_platform_frameworks_base"
+             remote="circle"
+             revision="circle-14.0" />
+
+    <!-- build/make: Circle build targets and lunch combos -->
+    <remove-project name="platform/build" />
+    <project path="build/make"
+             name="CircleOS_build_make"
+             remote="circle"
+             revision="circle-14.0" />
+
+    <!-- Settings: CircleSettings privacy dashboard -->
+    <remove-project name="platform/packages/apps/Settings" />
+    <project path="packages/apps/Settings"
+             name="CircleOS_packages_apps_Settings"
+             remote="circle"
+             revision="circle-14.0" />
+
+    <!-- ============================================================ -->
+    <!-- CIRCLE OS ADDITIONS (no AOSP project to remove)              -->
+    <!-- ============================================================ -->
+
+    <!-- Vendor overlay: Circle properties, packages, SELinux policy -->
+    <project path="vendor/circle"
+             name="CircleOS_vendor_circle"
+             remote="circle"
+             revision="main" />
+
+    <!-- Device common: base device tree for Circle hardware targets -->
+    <project path="device/circle/common"
+             name="CircleOS_device_circle_common"
+             remote="circle"
+             revision="main" />
+
+</manifest>
