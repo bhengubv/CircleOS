@@ -59,7 +59,7 @@ Enables users to activate curated "modes" that configure features, apps, and set
 | **PE Phase 1** | Foundation — Mode Manager, manual switching, Tier 1 modes, basic notification rules, quick settings integration | ✅ Done — frameworks/base `cfd1883e`, vendor/circle `b378c30` |
 | **PE Phase 2** | Intelligence — auto-switch triggers, conflict resolver, emergency bypass, state preservation, notification broker | ✅ Done — frameworks/base `e231fe4e` |
 | **PE Phase 3** | Customisation — mode editor, custom mode creation, per-mode app management, import/export | ✅ Done — frameworks/base `a04d6254`, vendor/circle `f312394` |
-| **PE Phase 4** | Lifestyle Modes — Tier 2 modes, download-on-activation flow, mode-specific app bundles | ⬜ Todo |
+| **PE Phase 4** | Lifestyle Modes — Tier 2 modes, download-on-activation flow, mode-specific app bundles | ✅ Done — frameworks/base `6b0269a9`, vendor/circle `61f6291` |
 | **PE Phase 5** | Advanced — managed modes (parental/enterprise), auto-switch learning, Tier 3 specialist modes, community sharing | ⬜ Todo |
 
 #### Critical Infrastructure (all phases)
