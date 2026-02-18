@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <!-- ◯ icon only — suitable for app icons, favicons -->
+  <rect width="120" height="120" rx="24" fill="#0D0D1A"/>
+  <circle cx="60" cy="60" r="40" stroke="#00D4FF" stroke-width="5" fill="none"/>
+</svg>
