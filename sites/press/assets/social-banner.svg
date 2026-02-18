@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" fill="none">
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#0D0D1A"/>
+  <!-- Subtle grid -->
+  <defs>
+    <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+      <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#1A1A2E" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+  <!-- Accent circles (decorative) -->
+  <circle cx="980" cy="315" r="260" stroke="#00D4FF" stroke-width="1.5" opacity="0.15" fill="none"/>
+  <circle cx="980" cy="315" r="180" stroke="#00D4FF" stroke-width="1" opacity="0.1" fill="none"/>
+  <!-- Logo -->
+  <circle cx="120" cy="315" r="70" stroke="#00D4FF" stroke-width="8" fill="none"/>
+  <!-- Wordmark -->
+  <text x="220" y="340" font-family="Inter, system-ui, sans-serif"
+        font-weight="800" font-size="72" letter-spacing="-2" fill="#FFFFFF">Circle OS</text>
+  <!-- Tagline -->
+  <text x="220" y="395" font-family="Inter, system-ui, sans-serif"
+        font-weight="400" font-size="28" fill="#8892A4">Privacy-first mobile OS · Made in South Africa · Apache 2.0</text>
+</svg>
