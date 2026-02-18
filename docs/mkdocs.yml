@@ -74,11 +74,13 @@ nav:
     - Code Style: dev/code-style.md
     - App Submission: dev/app-submission.md
     - APIs:
-      - SleptOn API: dev/apis/slepton.md
-      - Mesh API: dev/apis/mesh.md
-      - Titanium API: dev/apis/titanium.md
-      - Butler API: dev/apis/butler.md
-      - OTA API: dev/apis/ota.md
+      - Overview: dev/apis/index.md
+      - OTA Release API: dev/apis/ota-api.md
+      - App Catalogue API: dev/apis/app-api.md
+      - Waitlist API: dev/apis/waitlist-api.md
+      - Mesh API: dev/apis/mesh-api.md
+      - Titanium API: dev/apis/titanium-api.md
+      - Butler API: dev/apis/butler-api.md
     - Device Support: dev/device-support.md
     - Testing: dev/testing.md
     - Releases: dev/releases.md
