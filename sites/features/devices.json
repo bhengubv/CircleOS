@@ -1,0 +1,56 @@
+{
+  "brands": [
+    {
+      "id": "samsung",
+      "name": "Samsung",
+      "devices": [
+        { "model": "Galaxy A52",  "codename": "a52",      "supported": true,  "expected": null },
+        { "model": "Galaxy A53",  "codename": "a53",      "supported": true,  "expected": null },
+        { "model": "Galaxy A32",  "codename": "a32",      "supported": false, "expected": "Q2 2026" },
+        { "model": "Galaxy A14",  "codename": "a14",      "supported": false, "expected": "Q3 2026" },
+        { "model": "Galaxy A54",  "codename": "a54",      "supported": false, "expected": "Q3 2026" }
+      ]
+    },
+    {
+      "id": "xiaomi",
+      "name": "Xiaomi",
+      "devices": [
+        { "model": "Redmi Note 10",  "codename": "rosemary", "supported": true,  "expected": null },
+        { "model": "Redmi Note 11",  "codename": "spes",     "supported": true,  "expected": null },
+        { "model": "Poco X3",        "codename": "surya",    "supported": false, "expected": "Q2 2026" }
+      ]
+    },
+    {
+      "id": "tecno",
+      "name": "Tecno",
+      "devices": [
+        { "model": "Camon 20",  "codename": "camon20", "supported": false, "expected": "Q2 2026" },
+        { "model": "Spark 10",  "codename": "spark10",  "supported": false, "expected": "Q3 2026" }
+      ]
+    },
+    {
+      "id": "infinix",
+      "name": "Infinix",
+      "devices": [
+        { "model": "Note 30",  "codename": "note30", "supported": false, "expected": "Q3 2026" },
+        { "model": "Hot 30",   "codename": "hot30",  "supported": false, "expected": "Q3 2026" }
+      ]
+    },
+    {
+      "id": "realme",
+      "name": "Realme",
+      "devices": [
+        { "model": "9",   "codename": "realme9",  "supported": false, "expected": "Q4 2026" },
+        { "model": "10",  "codename": "realme10", "supported": false, "expected": "Q4 2026" }
+      ]
+    },
+    {
+      "id": "nokia",
+      "name": "Nokia",
+      "devices": [
+        { "model": "G21",  "codename": "G21", "supported": true,  "expected": null },
+        { "model": "G60",  "codename": "G60", "supported": false, "expected": "Q2 2026" }
+      ]
+    }
+  ]
+}

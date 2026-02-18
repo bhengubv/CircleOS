@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Circle OS Versions</title>
+<meta name="description" content="Circle OS version history, changelog, and downloads."/>
+<style>
+:root { --bg:#0D0D1A;--surface:#1A1A2E;--accent:#00D4FF;--text:#fff;--muted:#8892A4;--border:#2A2A4A;--success:#00E676;--warn:#FFB300; }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;}
+a{color:var(--accent);text-decoration:none;}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;border-bottom:1px solid var(--border);background:rgba(13,13,26,.9);backdrop-filter:blur(12px);position:sticky;top:0;z-index:10;}
+.logo{font-weight:800;font-size:1.1rem;color:var(--text);}
+.container{max-width:900px;margin:0 auto;padding:0 24px;}
+.section{padding:60px 0;}
+h1{font-size:2.5rem;font-weight:800;margin-bottom:8px;}
+h2{font-size:1.4rem;font-weight:700;margin-bottom:12px;}
+.channels{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:40px 0;}
+.channel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;}
+.channel.stable{border-color:var(--success);}
+.channel-label{font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.channel-version{font-size:1.5rem;font-weight:800;color:var(--text);margin-bottom:4px;}
+.channel.stable .channel-version{color:var(--success);}
+.channel-date{font-size:.85rem;color:var(--muted);}
+.channel-desc{font-size:.85rem;color:var(--muted);margin-top:8px;}
+.btn{display:inline-block;padding:12px 24px;border-radius:8px;font-weight:600;font-size:.9rem;margin-top:12px;}
+.btn-primary{background:var(--accent);color:#0D0D1A;}
+.btn-secondary{border:1.5px solid var(--border);color:var(--text);}
+.changelog-item{border-bottom:1px solid var(--border);padding:32px 0;}
+.changelog-item:last-child{border-bottom:none;}
+.version-tag{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(0,212,255,.2);border-radius:100px;padding:4px 12px;display:inline-block;margin-bottom:12px;}
+.release-meta{font-size:.85rem;color:var(--muted);margin-bottom:16px;}
+.changes{display:flex;flex-direction:column;gap:8px;}
+.change{display:flex;gap:10px;font-size:.9rem;}
+.change-type{font-size:.75rem;font-weight:700;padding:2px 8px;border-radius:4px;white-space:nowrap;height:fit-content;margin-top:2px;}
+.security{background:rgba(0,230,118,.1);color:var(--success);}
+.feature{background:rgba(0,212,255,.1);color:var(--accent);}
+.fix{background:rgba(255,179,0,.1);color:var(--warn);}
+footer{text-align:center;padding:32px;border-top:1px solid var(--border);color:var(--muted);font-size:.875rem;}
+@media(max-width:600px){.channels{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <span class="logo">◯ Circle OS</span>
+  <div style="display:flex;gap:12px;">
+    <a href="#changelog">Changelog</a>
+    <a href="https://circleos.co.za">Main site</a>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="section">
+    <div style="font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:12px;">Downloads</div>
+    <h1>Circle OS Versions</h1>
+    <p style="color:var(--muted);margin-bottom:40px;">Latest builds for all channels. Choose stable for daily use.</p>
+
+    <div class="channels" id="channels">
+      <!-- Populated by JS from ota.circleos.co.za -->
+      <div class="channel stable">
+        <div class="channel-label">Stable</div>
+        <div class="channel-version" id="stable-version">Loading…</div>
+        <div class="channel-date" id="stable-date">—</div>
+        <div class="channel-desc">Most tested. Recommended for everyone.</div>
+        <a href="#" class="btn btn-primary" id="stable-dl">Download</a>
+        <a href="#changelog" class="btn btn-secondary" style="margin-left:8px;">Changelog</a>
+      </div>
+      <div class="channel">
+        <div class="channel-label">Beta</div>
+        <div class="channel-version" id="beta-version">Loading…</div>
+        <div class="channel-date" id="beta-date">—</div>
+        <div class="channel-desc">New features, may have bugs.</div>
+        <a href="#" class="btn btn-secondary" id="beta-dl">Download</a>
+      </div>
+      <div class="channel">
+        <div class="channel-label">Nightly</div>
+        <div class="channel-version" id="nightly-version">Loading…</div>
+        <div class="channel-date" id="nightly-date">—</div>
+        <div class="channel-desc">Daily builds. For developers only.</div>
+        <a href="#" class="btn btn-secondary" id="nightly-dl">Download</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" id="changelog">
+    <h2>Changelog</h2>
+    <div id="changelog-list">
+      <!-- Static seed while API loads -->
+      <div class="changelog-item">
+        <span class="version-tag">v1.0.4</span>
+        <div class="release-meta">18 February 2026 — Stable</div>
+        <div class="changes">
+          <div class="change"><span class="change-type security">Security</span><span>NetworkPermissionEnforcer: incremental netd retry backoff (5s × n, max 60s)</span></div>
+          <div class="change"><span class="change-type security">Security</span><span>BehavioralSandbox: IPv6 /proc/net/tcp6 decoding fixed</span></div>
+          <div class="change"><span class="change-type feature">Feature</span><span>CircleSettings: full UI — OTA status, channel switcher, privacy summary</span></div>
+          <div class="change"><span class="change-type fix">Fix</span><span>DataAcuityClient: production key now reads from ro.circleos.dataacuity.pubkey</span></div>
+        </div>
+      </div>
+      <div class="changelog-item">
+        <span class="version-tag">v1.0.3</span>
+        <div class="release-meta">15 February 2026 — Stable</div>
+        <div class="changes">
+          <div class="change"><span class="change-type feature">Feature</span><span>Phase 10: Staged rollout automation with 3-stage ladder</span></div>
+          <div class="change"><span class="change-type feature">Feature</span><span>Phase 9: Device registry and crash/ANR telemetry</span></div>
+          <div class="change"><span class="change-type feature">Feature</span><span>Mesh: BLE GATT PeerDiscovery with Circle OS service UUID</span></div>
+        </div>
+      </div>
+      <div class="changelog-item">
+        <span class="version-tag">v1.0.2</span>
+        <div class="release-meta">12 February 2026 — Stable</div>
+        <div class="changes">
+          <div class="change"><span class="change-type feature">Feature</span><span>Butler AI: 5-tier model selection, context-aware personality</span></div>
+          <div class="change"><span class="change-type feature">Feature</span><span>Titanium: offline tap-to-pay with TEE hardware keystore</span></div>
+          <div class="change"><span class="change-type feature">Feature</span><span>microG integration, Camera/Mic privacy indicators</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>◯ Circle OS — <a href="https://circleos.co.za">circleos.co.za</a> — <a href="https://docs.circleos.co.za">Docs</a> — Made in South Africa</p>
+</footer>
+
+<script>
+async function loadVersions() {
+  try {
+    const channels = ['stable', 'beta', 'nightly'];
+    for (const ch of channels) {
+      const r = await fetch(`https://ota.circleos.co.za/os/releases/latest?channel=${ch}`);
+      if (!r.ok) continue;
+      const d = await r.json();
+      if (!d.has_update && !d.release) continue;
+      const rel = d.release;
+      if (!rel) continue;
+      const el_v = document.getElementById(`${ch}-version`);
+      const el_d = document.getElementById(`${ch}-date`);
+      const el_dl = document.getElementById(`${ch}-dl`);
+      if (el_v) el_v.textContent = `v${rel.version}`;
+      if (el_d) el_d.textContent = new Date(rel.created_at).toLocaleDateString('en-ZA');
+      if (el_dl) el_dl.href = rel.manifest_url || '#';
+    }
+  } catch(e) {
+    console.log('Version API not reachable, showing static content');
+  }
+}
+loadVersions();
+</script>
+</body>
+</html>

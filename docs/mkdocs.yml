@@ -1,0 +1,119 @@
+site_name: Circle OS Docs
+site_url: https://docs.circleos.co.za
+site_description: Circle OS documentation — user guides, developer docs, technical specs.
+site_author: The Geek Network (Pty) Ltd
+repo_url: https://github.com/bhengubv/CircleOS
+repo_name: CircleOS
+
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: custom
+    accent: custom
+  font:
+    text: Inter
+    code: JetBrains Mono
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+  logo: assets/logo.svg
+  favicon: assets/favicon.svg
+  custom_dir: overrides
+
+extra_css:
+  - stylesheets/extra.css
+
+extra:
+  social:
+    - icon: fontawesome/brands/discord
+      link: https://discord.gg/circleos
+    - icon: fontawesome/brands/telegram
+      link: https://t.me/CircleOS
+    - icon: fontawesome/brands/github
+      link: https://github.com/bhengubv
+
+copyright: Copyright &copy; 2026 The Geek Network (Pty) Ltd — Apache 2.0
+
+nav:
+  - Home: index.md
+
+  - User Guides:
+    - Getting Started: user/getting-started.md
+    - Installation:
+      - Overview: user/installation/index.md
+      - Samsung Galaxy A52: user/installation/samsung-galaxy-a52.md
+      - Samsung Galaxy A53: user/installation/samsung-galaxy-a53.md
+      - Xiaomi Redmi Note 10: user/installation/xiaomi-redmi-note-10.md
+      - Xiaomi Redmi Note 11: user/installation/xiaomi-redmi-note-11.md
+      - Nokia G21: user/installation/nokia-g21.md
+    - First Boot: user/first-boot.md
+    - Features:
+      - Butler AI: user/features/butler.md
+      - Titanium Wallet: user/features/titanium.md
+      - Mesh Network: user/features/mesh.md
+      - Privacy: user/features/privacy.md
+      - Compression: user/features/compression.md
+      - Personality Modes: user/features/modes.md
+    - SleptOn Store: user/slepton.md
+    - Settings: user/settings.md
+    - Troubleshooting: user/troubleshooting.md
+    - FAQ: user/faq.md
+
+  - Developer Docs:
+    - Getting Started: dev/getting-started.md
+    - Build from Source: dev/build-from-source.md
+    - Architecture: dev/architecture.md
+    - Contributing: dev/contributing.md
+    - Code Style: dev/code-style.md
+    - App Submission: dev/app-submission.md
+    - APIs:
+      - SleptOn API: dev/apis/slepton.md
+      - Mesh API: dev/apis/mesh.md
+      - Titanium API: dev/apis/titanium.md
+      - Butler API: dev/apis/butler.md
+      - OTA API: dev/apis/ota.md
+    - Device Support: dev/device-support.md
+    - Testing: dev/testing.md
+    - Releases: dev/releases.md
+
+  - Technical Specs:
+    - Overview: specs/overview.md
+    - Security: specs/security.md
+    - Mesh Protocol: specs/mesh.md
+    - Titanium / SDPKT: specs/titanium.md
+    - Compression: specs/compression.md
+    - OTA System: specs/ota.md
+    - SleptOn: specs/slepton.md
+
+  - Legal:
+    - Privacy Policy: legal/privacy.md
+    - Terms of Use: legal/terms.md
+    - License: legal/license.md
+    - Warranty: legal/warranty.md
+
+plugins:
+  - search
+  - minify:
+      minify_html: true
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.emoji
+  - tables
+  - toc:
+      permalink: true
