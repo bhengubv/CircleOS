@@ -366,6 +366,83 @@ Intelligent on-device compression integrated directly into the DMZ pipeline. Eve
 
 ---
 
+## 7. SDPKT Titanium ⬜ Not Started
+
+**Version:** 1.0 DRAFT | **Owner:** The Geek (Pty) Ltd | **Classification:** Internal
+**Currency:** Shongololo (₷) | **Service name:** `circle.sdpkt`
+
+Hardware-grade digital cash built into Circle OS at the system level. Phone-to-phone NFC transfers with no internet required — like handing over physical cash. Keys never leave the TEE.
+
+### Architecture
+
+| Component | Responsibility |
+|-----------|----------------|
+| **Wallet Core** | Balance management, transaction history, sync queue |
+| **Protection Engine** | Stress detection, location rules, transaction gating |
+| **Hardware Keystore** | TEE-based key storage (ECDSA secp256k1), signing, tamper protection |
+| **NFC P2P Protocol** | NFCIP-1 (ISO 18092) device discovery, ECDH handshake, AES-256-GCM transfer |
+
+### Cryptographic Spec
+
+| Function | Algorithm |
+|----------|-----------|
+| Key generation | ECDSA secp256k1 (StrongBox/TEE-backed Android Keystore) |
+| Signing | ECDSA SHA-256 |
+| Key exchange | ECDH |
+| Session encryption | AES-256-GCM |
+| Hashing | SHA-256 |
+
+### Transaction Limits (defaults)
+
+| Context | Per-tap | Daily |
+|---------|---------|-------|
+| Home | ₷5,000 | ₷20,000 |
+| Known location | ₷2,000 | ₷10,000 |
+| Unknown location | ₷500 | ₷2,000 |
+| Risky area | ₷200 | ₷500 |
+| Moving (>30 km/h) | ₷100 | ₷500 |
+| Lock screen quick pay | ₷100 | — |
+| Offline accumulation | — | ₷5,000 before sync required |
+
+### Implementation Phases
+
+| Phase | Tasks | Description | Status |
+|-------|-------|-------------|--------|
+| **Ph 1** | #73–76 | Core Wallet: TEE keys, NFC P2P, signing/verification, balance management, basic UI | ⬜ |
+| **Ph 2** | #77 | Offline: transaction log, settlement queue, double-spend detection, sync protocol | ⬜ |
+| **Ph 3** | #78 | Protection Engine: location rules + learning, stress detection (accelerometer + watch) | ⬜ |
+| **Ph 4** | #79 | Integration: Butler voice, Personality modes, lock screen quick pay, mesh settlement | ⬜ |
+| **Ph 5** | #80 | Polish: calibration UX, analytics, export/backup, multi-device | ⬜ |
+
+### Protection Engine
+
+**Stress detection signals:** accelerometer tremor, heart rate spike (>120 BPM), grip pressure, voice stress, smartwatch GSR.
+**Response:** attacker sees generic "network error"; victim sees delayed "protection activated" notification when safe.
+**Location learning:** 5 visits to a location upgrades it from Unknown → Known limits. Home/Work auto-detected.
+**Privacy:** all location data stored locally only, never uploaded.
+
+### Integration Points
+
+| System | How |
+|--------|-----|
+| DMZ | Transaction validation before settlement |
+| Inference/Butler | Voice commands: "Send ₷50 to Bob", "What's my balance?" |
+| Personality Engine | Mode-based limits (Secure=reduced, Party=higher quick-pay, Work=logging) |
+| Traffic Lobby | Sync traffic validation when online |
+| Mesh Network | Transaction propagation for offline settlement |
+
+### Key Paths (planned)
+
+| Resource | Path |
+|----------|------|
+| AIDL + Parcelables | `frameworks/base/core/java/za/co/circleos/sdpkt/` |
+| System service | `frameworks/base/services/core/java/com/circleos/server/sdpkt/` |
+| Transaction log | `/data/circle/sdpkt/pending.jsonl` |
+| Location history | `/data/circle/sdpkt/locations.db` (local only) |
+| SDPKT app | `vendor/circle/apps/SdpktTitanium/` |
+
+---
+
 ## Device Tier Reference
 
 | Tier | RAM | Backend | Model |
