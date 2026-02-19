@@ -1,3 +1,5 @@
+Autonomous: On
+
 # Circle OS & Data Acuity — Claude Code Instructions
 
 > **"Slow is smooth. Smooth is fast. Fast leads to delivery."**
