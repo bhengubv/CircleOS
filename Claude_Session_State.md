@@ -366,72 +366,42 @@ Intelligent on-device compression integrated directly into the DMZ pipeline. Eve
 
 ---
 
-## 7. SDPKT Titanium ⬜ Not Started
+## 7. SDPKT Titanium ✅ Phases 1–6 Complete
 
-**Version:** 1.0 DRAFT | **Owner:** The Geek (Pty) Ltd | **Classification:** Internal
-**Currency:** Shongololo (₷) | **Service name:** `circle.sdpkt`
+**Version:** 1.0 | **Owner:** The Geek (Pty) Ltd | **Service name:** `circle.sdpkt`
+**Currency:** Shongololo (₷)
 
-Hardware-grade digital cash built into Circle OS at the system level. Phone-to-phone NFC transfers with no internet required — like handing over physical cash. Keys never leave the TEE.
-
-### Architecture
-
-| Component | Responsibility |
-|-----------|----------------|
-| **Wallet Core** | Balance management, transaction history, sync queue |
-| **Protection Engine** | Stress detection, location rules, transaction gating |
-| **Hardware Keystore** | TEE-based key storage (ECDSA secp256k1), signing, tamper protection |
-| **NFC P2P Protocol** | NFCIP-1 (ISO 18092) device discovery, ECDH handshake, AES-256-GCM transfer |
-
-### Cryptographic Spec
-
-| Function | Algorithm |
-|----------|-----------|
-| Key generation | ECDSA secp256k1 (StrongBox/TEE-backed Android Keystore) |
-| Signing | ECDSA SHA-256 |
-| Key exchange | ECDH |
-| Session encryption | AES-256-GCM |
-| Hashing | SHA-256 |
-
-### Transaction Limits (defaults)
-
-| Context | Per-tap | Daily |
-|---------|---------|-------|
-| Home | ₷5,000 | ₷20,000 |
-| Known location | ₷2,000 | ₷10,000 |
-| Unknown location | ₷500 | ₷2,000 |
-| Risky area | ₷200 | ₷500 |
-| Moving (>30 km/h) | ₷100 | ₷500 |
-| Lock screen quick pay | ₷100 | — |
-| Offline accumulation | — | ₷5,000 before sync required |
+Hardware-grade digital cash built into Circle OS at the system level. Phone-to-phone NFC transfers with no internet required. Keys never leave the TEE.
 
 ### Implementation Phases
 
-| Phase | Tasks | Description | Status |
-|-------|-------|-------------|--------|
-| **Ph 1** | #73–76 | Core Wallet: TEE keys, NFC P2P, signing/verification, balance management, basic UI | ⬜ |
-| **Ph 2** | #77 | Offline: transaction log, settlement queue, double-spend detection, sync protocol | ⬜ |
-| **Ph 3** | #78 | Protection Engine: location rules + learning, stress detection (accelerometer + watch) | ⬜ |
-| **Ph 4** | #79 | Integration: Butler voice, Personality modes, lock screen quick pay, mesh settlement | ⬜ |
-| **Ph 5** | #80 | Polish: calibration UX, analytics, export/backup, multi-device | ⬜ |
+| Phase | Description | Status | Commits |
+|-------|-------------|--------|---------|
+| **Ph 1** | Core Wallet: TEE keys, NFC P2P, signing/verification, balance management, basic UI | ✅ Done | frameworks/base `4d50b366`, vendor/circle `e6d80e4` |
+| **Ph 2** | Offline: transaction log, settlement queue, double-spend detection, sync protocol | ✅ Done | frameworks/base `26b28a9d`, vendor/circle `aba9497` |
+| **Ph 3** | Protection Engine: location rules + learning, stress detection (accelerometer + watch) | ✅ Done | frameworks/base `2e7d996b`, vendor/circle `101161b` |
+| **Ph 4** | Integration: Butler voice, Personality modes, lock screen quick pay, mesh settlement | ✅ Done | frameworks/base `df717722`, vendor/circle `4fff2b4` |
+| **Ph 5** | Polish: calibration UX, analytics, export/backup, protection log | ✅ Done | frameworks/base `68673054`, vendor/circle `7d530ea` |
+| **Ph 6** | Multi-device: NFC tap-to-pair, WearLinkManager, wearable stress data, device persistence | ✅ Done | frameworks/base `ff469b8f` + `9fc0ff49` |
 
-### Protection Engine
+### Post-Phase Improvements
 
-**Stress detection signals:** accelerometer tremor, heart rate spike (>120 BPM), grip pressure, voice stress, smartwatch GSR.
-**Response:** attacker sees generic "network error"; victim sees delayed "protection activated" notification when safe.
-**Location learning:** 5 visits to a location upgrades it from Unknown → Known limits. Home/Work auto-detected.
-**Privacy:** all location data stored locally only, never uploaded.
+| Commit | Description |
+|--------|-------------|
+| `2a19cc5a` | T1-03/07/08 — mesh frame routing, sensor permission check, revoke unused permissions |
+| `a536b260` | T2-01 — HTTP settlement POST to `sleptonapi.thegeeknetwork.co.za/api/sdpkt/settle` |
+| (this session) | T6-01 — Secondary device spending limit enforcement in ProtectionEngine |
 
-### Integration Points
+### T6-01: Secondary Device Spending Limits (this session)
 
-| System | How |
-|--------|-----|
-| DMZ | Transaction validation before settlement |
-| Inference/Butler | Voice commands: "Send ₷50 to Bob", "What's my balance?" |
-| Personality Engine | Mode-based limits (Secure=reduced, Party=higher quick-pay, Work=logging) |
-| Traffic Lobby | Sync traffic validation when online |
-| Mesh Network | Transaction propagation for offline settlement |
+The `spendingLimitSats` field on `DeviceLink` was stored but never enforced at payment time.
 
-### Key Paths (planned)
+**Changes:**
+- `NfcTransferRequest.java` — added `senderDeviceId` field (null = primary, no limit)
+- `ProtectionEngine.java` — added `evaluateTransfer(amountCents, lockScreen, senderDeviceId)` overload; step 2.5 checks the linked device map and blocks if per-device limit exceeded
+- `SdpktTitaniumService.java` — wires `mLinkedDevices` provider into ProtectionEngine at Phase 6 boot; passes `request.senderDeviceId` through to `evaluateTransfer()`
+
+### Key Paths
 
 | Resource | Path |
 |----------|------|
@@ -440,6 +410,13 @@ Hardware-grade digital cash built into Circle OS at the system level. Phone-to-p
 | Transaction log | `/data/circle/sdpkt/pending.jsonl` |
 | Location history | `/data/circle/sdpkt/locations.db` (local only) |
 | SDPKT app | `vendor/circle/apps/SdpktTitanium/` |
+
+### Remaining (Phase 7+)
+
+| Item | Notes |
+|------|-------|
+| Wear OS DataLayer API | WearLinkManager uses broadcasts now; full DataLayer sync deferred |
+| Settlement backend validation | Test HTTP POST to sleptonapi in staging; confirm 200/409 handling |
 
 ---
 
