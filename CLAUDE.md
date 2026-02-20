@@ -88,7 +88,7 @@ DATABASE:     SQLite (SQLCipher for encrypted)
 ### Data Acuity (Backend)
 
 ```
-PLATFORM:     .NET 8 / ASP.NET Core
+PLATFORM:     .NET 10 / ASP.NET Core
 LANGUAGES:    C#
 DATABASE:     PostgreSQL 16
 CACHE:        Redis 7
