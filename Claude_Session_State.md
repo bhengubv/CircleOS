@@ -17,6 +17,13 @@ Tracks implementation progress across sessions. Update after each session.
 | OS Phase 4 | OTA update service, network monitor | ✅ Done |
 | OS Phase 5 | Notification/clipboard/camera privacy, analytics, backup, DoH | ✅ Done |
 
+#### Post-Phase Privacy Additions
+
+| Commit | Description |
+|--------|-------------|
+| `c786d831` | T2-05 — `INotificationPrivacyManager` AIDL + `NotificationPrivacyService` (`android/circleos/`) |
+| `2a19cc5a` | T1-07/08 — `checkSensorPermission` real implementation; `revokeUnusedPermissions` 30-day scan |
+
 ---
 
 ### 2. Inference Service ✅ Complete
@@ -31,6 +38,13 @@ Package: `za.co.circleos.inference`. Service name: `circle.inference`.
 | **Inf Phase 2** | Rust abstraction layer — `InferenceBackend` trait, JNI bridge Java→Rust, ResourceGovernor, ModelManager download support | ✅ Done — `ca39f5a6` |
 | **Inf Phase 3** | BitNet integration — BitNetBackend, backend auto-selection logic, performance benchmarking | ✅ Done — `df19a59a` |
 | **Inf Phase 4** | Model store — `getDownloadableModels()`, `downloadModel()` AIDL, service v4 | ✅ Done — `6d9768d3` |
+
+#### Post-Phase Inference Improvements
+
+| Commit | Description |
+|--------|-------------|
+| `513f3c9a` | T1-01 — Replace JNI stub with real llama.cpp generation loop in `llama_backend.rs` |
+| `61858bdb` | T2-09 — Populate `parameterCount` from remote model store manifest |
 
 #### `vendor/circle`
 
@@ -56,8 +70,6 @@ Repo: `/Users/admin/Code/Dev/TheGeekNetwork/` — `code/Shared/TheGeekNetwork.Sh
 | Commits | Initial library: `244f349` · Solution: `066d1ac` · README: `8c72a34` · Personality: `eb36635` | |
 
 #### Inference ↔ Personality Mode Integration ✅ Done
-
-Both systems now cross-reference each other. Apps adapt system prompts based on the active mode.
 
 | Item | Description | Commit |
 |------|-------------|--------|
@@ -115,69 +127,12 @@ Enables users to activate curated "modes" that configure features, apps, and set
 | `301d331` | CommunityActivity: fix broken community import + Tier-2/3 bundle download flow |
 | `c9c314c` | PersonalityTile: Phase 5 managed-mode PIN unlock dialog in ModeChooserActivity |
 
-#### Critical Infrastructure (all phases)
-
-| System | Purpose |
-|--------|---------|
-| Mode Manager | Atomic switching, state management, mode stack |
-| Conflict Resolver | Priority hierarchy, override rules, merge option |
-| Emergency Bypass | Starred contacts always ring, SOS bypasses all modes |
-| Customisation Engine | Edit, clone, create, import/export modes |
-| State Preservation | Draft/media/app continuity across mode switches |
-| Notification Broker | Queue silenced notifications, catch-up summary |
-| Transparency Layer | "This mode will..." summary, settings audit |
-| Onboarding Flow | First-boot selector, tutorials, contextual discovery |
-| Auto-Switch Intelligence | Context detection, learns from overrides, undo |
-| App Management | Per-mode show/hide/disable, drawer filtering |
-| Managed Modes | Parental controls, enterprise MDM, PIN-lock |
-| Offline Resilience | Tier 1 cores always available, graceful degradation |
-
 ---
 
-## Key Paths
-
-| Resource | Path |
-|----------|------|
-| AIDL + Parcelables | `frameworks/base/core/java/za/co/circleos/inference/` |
-| Java service | `frameworks/base/services/core/java/com/circleos/server/inference/` |
-| JNI bridge | `frameworks/base/services/core/jni/circle_inference_jni.cpp` |
-| Rust layer | `frameworks/base/services/core/rust/circle_inference/` |
-| Model dirs | `/system/circle/models/` (bundled), `/data/circle/models/` (downloaded) |
-| SystemServer | `frameworks/base/services/java/com/android/server/SystemServer.java` |
-| Manifest | `frameworks/base/core/res/AndroidManifest.xml` |
-| Butler app | `vendor/circle/apps/Butler/` |
-| Inference client lib (Android) | `vendor/circle/libs/inference-client/` |
-| InferenceBridge app | `vendor/circle/apps/InferenceBridge/` |
-| InferenceBridge docs | `vendor/circle/docs/inference-service-integration.md` |
-| .NET inference client | `TheGeekNetwork/code/Shared/TheGeekNetwork.Shared.CircleInference/` |
-| Personality service | `frameworks/base/services/core/java/com/circleos/server/personality/` |
-| PersonalityTile | `vendor/circle/apps/PersonalityTile/` |
-| PersonalityEditor | `vendor/circle/apps/PersonalityEditor/` |
-| Geek Network apps | `/Users/admin/Code/Dev/TheGeekNetwork/Apps/` |
-| Security AIDL + Parcelables | `frameworks/base/core/java/za/co/circleos/security/` |
-| File DMZ service | `frameworks/base/services/core/java/com/circleos/server/security/` |
-| Traffic Lobby VPN | `vendor/circle/apps/TrafficLobby/` |
-| Malware Jail / Quarantine | `frameworks/base/services/core/java/com/circleos/server/security/QuarantineManager.java` |
-| Threat feeds DB | `/data/circle/security/feeds/` (runtime, populated by ThreatFeedUpdater) |
-| CDR output | `/data/circle/security/cdr/` (runtime, session-scoped, auto-deleted) |
-| Quarantine store | `/data/circle/security/quarantine/` (runtime, system-only access) |
-| Compression AIDL + Parcelables | `frameworks/base/core/java/za/co/circleos/compression/` |
-| Compression service | `frameworks/base/services/core/java/com/circleos/server/compression/` |
-| Compression stats | `/data/circle/compression/stats.json` (monthly, auto-reset) |
-| Compression sessions | `/data/circle/compression/sessions/` (runtime, auto-deleted after release) |
-| CircleTheme overlay | `vendor/circle/overlay/CircleTheme/` |
-| Design system docs | `vendor/circle/docs/design-system-accessibility-audit.md` |
-| Prebuilt fonts | `vendor/circle/prebuilt/fonts/` (TTFs needed — see README) |
-| .NET design tokens | `TheGeekNetwork/code/Shared/TheGeekNetwork.Shared.CircleDesign/` |
-
----
-
-## 4. Circle OS Design System ✅ Complete
+### 4. Circle OS Design System ✅ Complete
 
 **Version:** 1.0 | **Owner:** The Geek (Pty) Ltd | **Base:** The Geek Network Design System v2.1
 **Commits:** vendor/circle `79ab409` (50 files) · `05748f5` (font + A-01 fix) · TheGeekNetwork `f99ce93` (6 files)
-
-### Implementation Status
 
 | # | Area | Description | Status |
 |---|------|-------------|--------|
@@ -193,230 +148,252 @@ Enables users to activate curated "modes" that configure features, apps, and set
 | 10 | Accessibility audit | `docs/design-system-accessibility-audit.md` — WCAG 2.1 AA contrast ratios, touch target table, focus indicator spec, reduced-motion, known issues | ✅ Done |
 | 11 | .NET / MAUI design token port | `CircleColors`, `CircleSpacing`, `CircleTypography`, `CircleModeTheme` + `CircleModeThemeBundle` in `TheGeekNetwork.Shared.CircleDesign` | ✅ Done |
 
-### Colour Reference
-
-| Token | Hex | Usage |
-|-------|-----|-------|
-| Primary Black | `#0A0A0A` | Text, dark backgrounds |
-| Primary White | `#FFFFFF` | Text (dark), light backgrounds |
-| Accent Blue | `#2196F3` | Interactive elements, brand |
-| Success Green | `#4CAF50` | Confirmations |
-| Warning Amber | `#FF9800` | Warnings |
-| Error Red | `#F44336` | Errors, destructive actions |
-
 **Mode accents:** Daily `#2196F3` · Work `#607D8B` · Secure `#B71C1C` · Sport `#FF5722` · Party `#E91E63` · Night `#5D4037` · Student `#009688` · Creator `#9C27B0`
 
-**Dark mode is the default** (OLED battery savings).
-
-### Theme File Paths
-
-```
-vendor/circle/overlay/CircleTheme/res/
-├── values/
-│   ├── colors.xml                 # Core palette + elevation surfaces
-│   ├── colors_mode_*.xml          # 8 mode accent overrides (+ pressed/ripple/focus)
-│   ├── dimens.xml                 # Spacing 2dp–48dp, touch targets, icon sizes, radii
-│   ├── type.xml                   # Type scale Display Large 57sp → Label Small 11sp
-│   ├── themes.xml                 # Base dark (default) + light + 17 mode-specific themes
-│   ├── themes_mode_elder.xml      # Elder overrides (font scale, touch targets)
-│   ├── themes_mode_night.xml      # Night overrides (warm accent, dim overlay)
-│   ├── themes_mode_secure.xml     # Secure overrides (dark red, hidden notif content)
-│   ├── styles.xml                 # Component styles (buttons, cards, QS tiles, notifs)
-│   └── motion.xml                 # Duration scale constants (0–400ms)
-├── font/
-│   └── comfortaa.xml              # Font family (TTFs in prebuilt/fonts/ — see README)
-├── drawable/
-│   ├── ic_mode_*.xml              # 15 mode icons (outlined, 24dp, accent stroke)
-│   └── bg_*.xml                   # 9 component drawables (buttons, cards, QS tiles)
-└── anim/
-    ├── mode_transition.xml        # Full 300ms crossfade set
-    ├── mode_transition_fade_out.xml
-    └── mode_transition_fade_in.xml
-```
-
-### .NET Design Token Library
-
-`TheGeekNetwork/code/Shared/TheGeekNetwork.Shared.CircleDesign/` — added to `TheGeekNetwork.sln` Shared folder.
-
-| Class | Contents |
-|-------|----------|
-| `CircleColors` | All colour constants (Color objects) matching `colors.xml` |
-| `CircleSpacing` | Spacing scale, touch targets, icon sizes, radii, button/card dims |
-| `CircleTypography` | Type scale sizes, font family constants, font scale multipliers, `Scale()` helper |
-| `CircleModeTheme` | `AccentFor(modeId)`, `Pressed()`, `Ripple()`, `HasDimOverlay()`, `IsSecureMode()`, `IsElderMode()`, `BundleFor()` → `CircleModeThemeBundle` |
-
-### All items resolved — commit `05748f5`
-
-- [x] Comfortaa variable font downloaded (Google Fonts, OFL) — `prebuilt/fonts/comfortaa_variable.ttf` + weight-named copies; `res/font/comfortaa_variable.ttf` in overlay; `comfortaa.xml` updated to use `fontVariationSettings` (API 26+)
-- [x] Accessibility A-01 fixed — `circle_text_secondary_dark` `#9E9E9E` → `#B8B8B8` (4.56:1 on card surface, 9.9:1 on background — WCAG AA ✅)
-
 ---
 
-## 5. Circle OS Security Architecture ✅ Phases 1–3 Complete
+### 5. Circle OS Security Architecture ✅ Phases 1–3 + Post-Phase Complete
 
-**Version:** 1.0 DRAFT | **Owner:** The Geek (Pty) Ltd | **Classification:** Internal
 **Philosophy:** Defense in depth — If it's man-made, we can beat it. Pegasus is useless if it can't phone home.
 
-### Threat Model
-Nation-state adversaries (Pegasus, Predator), zero-click exploits, supply chain compromise, physical access, network-level attacks.
+#### Phase 1: Core Security ✅ — `71ed576a` · vendor/circle `81faa3e`
 
-### Security Stack — 5 Layers
+| Task | Description |
+|------|-------------|
+| #55 | File DMZ service — `CircleFileDmzService` (`circle.file_dmz`), SHA-256 intake, feed hash check, CDR orchestration, session management, quarantine |
+| #56 | CDR for images and PDFs — `CdrProcessor`: image re-encode (strips metadata/exploits); PDF passthrough |
+| #57 | Traffic Lobby VPN app — local VPN TUN `10.0.0.1/24`, `TrafficAnalyzer`, PARANOID/BALANCED/RELAXED modes, DGA entropy (Shannon >3.5), beaconing |
+| #58 | Threat feed integration — `ThreatFeedDatabase` (in-memory IP/domain/hash blocklists), `ThreatFeedUpdater` (24h stale-check) |
+| #59 | Spyware behavior detection — `SpywareBehaviorDetector`: mic/camera/location flags + upload correlation |
 
-| Layer | Name | Purpose |
-|-------|------|---------|
-| 1 | **File DMZ** | Intercept all incoming files — sandbox analysis, CDR sanitization, user approval gate |
-| 2 | **Traffic Lobby** | Monitor all network connections — block/hold suspicious traffic, detect C2 beaconing |
-| 3 | **Malware Jail** | Contain detected threats — observe behavior, extract intelligence |
-| 4 | **Community Defense** | Opt-in threat sharing — collective immunity, privacy-preserving |
-| 5 | **Data Acuity** | Aggregate intelligence — map threat infrastructure, protect ecosystem |
+#### Phase 2: Advanced Protection ✅ — `6783d222`
 
-### Implementation Phases
+| Task | Description |
+|------|-------------|
+| #60 | Full CDR — Office ZIP (strip VBA), HTML (strip script/iframe/on*), ZIP (recursive depth-3, drop executables), media passthrough |
+| #61 | Behavioral analysis sandbox — `BehavioralSandbox`: PE/ELF magic, VBA macros, PowerShell, Base64 >200, URL/IP extraction (up to 5 MB) |
+| #62 | Malware Jail — `QuarantineManager` (`circle.quarantine`): encrypted dir, files renamed `.quarantine`, flat-JSON index |
+| #63 | Community Defense opt-in — `CommunityDefenseService`: anonymized IOC sharing (hash/domain/IP only); 6h batched ±30min jitter |
+| #64 | Data Acuity integration — `DataAcuityClient`: atomic feed download, Ed25519 verification placeholder, IOC batch POST |
 
-#### Phase 1: Core Security ✅ Complete
+#### Phase 3: Intelligence ✅ — `5f853a3c`
 
-**Commits:** frameworks/base `71ed576a` (12 files, 735 insertions) · vendor/circle `81faa3e` (12 files, 630 insertions)
+| Task | Description |
+|------|-------------|
+| #65 | `IocExtractor` — STIX 2.1 `toStixIndicator()` per IOC; patterns: IPv4, domain, SHA-256, beacon |
+| #66 | `CampaignCorrelator` — /24 subnet, beacon interval ±5%, 72h window; MITRE ATT&CK TTP mapping (T1071/T1568/T1027/T1102) |
+| #67 | `InfrastructureMapper` — "Zombie Map" graph; predicts /24 when ≥3 IPs confirmed (SUBNET_PREDICTION_THRESHOLD=3) |
+| #68 | `ResearcherApiService` (`circle.researcher_api`) — STIX 2.1 bundle output via `IocBundle.stixJson` |
 
-| Task | Description | Status |
-|------|-------------|--------|
-| #55 | File DMZ service — `CircleFileDmzService` (`circle.file_dmz`), SHA-256 intake, feed hash check, CDR orchestration, session management, quarantine | ✅ Done |
-| #56 | CDR for images and PDFs — `CdrProcessor`: image re-encode via Android Bitmap API (strips all metadata/exploits); PDF passthrough (structural CDR in Phase 2) | ✅ Done |
-| #57 | Traffic Lobby VPN app — local VPN TUN `10.0.0.1/24`, `TrafficAnalyzer`, PARANOID/BALANCED/RELAXED modes, DGA entropy detection (Shannon >3.5), beaconing | ✅ Done |
-| #58 | Threat feed integration — `ThreatFeedDatabase` (in-memory IP/domain/hash blocklists, flat file backed), `ThreatFeedUpdater` (24h stale-check, force-reload) | ✅ Done |
-| #59 | Spyware behavior detection — `SpywareBehaviorDetector`: mic/camera/location sensor flags + suspicious upload correlation → `Listener.onSpywareDetected()` | ✅ Done |
-
-#### Phase 2: Advanced Protection ✅ Complete
-
-**Commit:** frameworks/base `6783d222` (11 files, 1,198 insertions)
-
-| Task | Description | Status |
-|------|-------------|--------|
-| #60 | Full CDR — `CdrProcessor` extended: Office ZIP repack (strip VBA bin, sanitize macro refs), HTML (strip script/iframe/object/on*/javascript:), ZIP (recursive depth-3, drop executables), media passthrough | ✅ Done |
-| #61 | Behavioral analysis sandbox — `BehavioralSandbox`: static analysis (PE/ELF magic, VBA macros, PowerShell, Base64 >200 chars, URL/IP extraction); scans up to 5 MB | ✅ Done |
-| #62 | Malware Jail — `QuarantineManager` (`circle.quarantine`): encrypted dir `/data/circle/security/quarantine/<id>/`, files renamed `.quarantine`, flat-JSON index | ✅ Done |
-| #63 | Community Defense opt-in — `CommunityDefenseService` (`circle.community_defense`): anonymized IOC sharing (hash/domain/IP only; never content/identity/location/filename/path/app); 6h batched ±30min jitter; max queue 1000 | ✅ Done |
-| #64 | Data Acuity integration — `DataAcuityClient`: atomic feed download (`c2_ips.txt`, `c2_domains.txt`, `malware_hashes.txt`), Ed25519 verification placeholder, IOC batch POST to `/v1/community/iocs` | ✅ Done |
-
-#### Phase 3: Intelligence ✅ Complete
-
-**Commit:** frameworks/base `5f853a3c` (13 files, 1,135 insertions)
-
-| Task | Description | Status |
-|------|-------------|--------|
-| #65 | Automated IOC extraction — `IocExtractor`: structured `ThreatIndicator` objects from DMZ results + quarantine records; STIX 2.1 `toStixIndicator()` per IOC; patterns: IPv4, domain, SHA-256, beacon | ✅ Done |
-| #66 | Attack campaign correlation — `CampaignCorrelator`: clusters IOCs via /24 subnet, beacon interval ±5%, 72h temporal window, shared-IOC merge; MITRE ATT&CK TTP mapping (T1071, T1568, T1027, T1102) | ✅ Done |
-| #67 | Threat infrastructure mapping — `InfrastructureMapper`: "Zombie Map" graph (subnet→IPs, NS→domains, co-campaign edges); predicts unconfirmed infra when ≥3 IPs in /24 or shared nameserver | ✅ Done |
-| #68 | Data Acuity researcher API — `ResearcherApiService` (`circle.researcher_api`): `IDataAcuityResearcherApi` binder (campaign listing, IOC polling, infrastructure queries, STIX 2.1 bundle generation); wired into DMZ + QuarantineManager | ✅ Done |
-
-### Key Defense Points
-
-| Attack | Defense | Result |
-|--------|---------|--------|
-| FORCEDENTRY / JBIG2 (Pegasus) | CDR strips JBIG2 entirely from PDF | ✅ Payload eliminated |
-| Zero-click via message parser | File DMZ + Quiet Mode — no auto-parsing | ✅ Parser never runs |
-| C2 phone-home | Traffic Lobby detects beaconing | ✅ Detected + blocked |
-| Data exfiltration | Traffic Lobby flags large uploads | ✅ Detected |
-| Baseband attack | Below OS level | ⚠️ Cannot defend |
-
-### Additional Hardening (non-phased)
-
-- Quiet Mode messaging — hold encrypted blob, parse only on user action
-- Remove legacy formats — no JBIG2, old TIFF codecs, legacy fonts
-- Memory-safe parsers (Rust where possible)
-- Auto-reboot after 18h idle (clears memory-only malware)
-- Network permission required for ANY network access
-- Scoped contacts (3, not whole address book)
-
----
-
-## 6. Circle OS Compression ✅ Phase 1 Complete
-
-**Version:** 1.0 DRAFT | **Owner:** The Geek (Pty) Ltd | **Classification:** Internal
-**Commit:** frameworks/base `c910f488` (17 files, 1,629 insertions)
-
-Intelligent on-device compression integrated directly into the DMZ pipeline. Every inbound file is automatically optimized after CDR. All processing is on-device — no cloud proxies.
-
-**Pipeline (inbound):** scan → CDR → **compress** → clean+small file released to app
-**Pipeline (outbound):** compress → scan → send *(Traffic Lobby hook — Phase 2)*
-
-### Quality Tiers
-
-| Tier | Name | Use Case | JPEG | WebP |
-|------|------|----------|------|------|
-| 1 | Lossless | Documents, code, professional | 95 | 95 |
-| 2 | Visually Lossless *(default)* | Photos, casual sharing | 85 | 82 |
-| 3 | Aggressive | Low-data / mesh emergency | 65 | 60 |
-
-### Compression Engines
-
-| Class | What it handles | Typical savings |
-|-------|----------------|-----------------|
-| `ImageCompressor` | JPEG/WebP quality re-encode; PNG lossless (Bitmap); GIF passthrough; EXIF fully stripped (GPS, device, author, timestamps) | 40–70% |
-| `DocumentCompressor` | PDF XMP metadata strip; Office ZIP (DOCX/XLSX/PPTX/OD*) repack at DEFLATE-9; core.xml author/revision zeroed | 20–60% |
-| `ArchiveCompressor` | ZIP repack at DEFLATE-9; drops `__MACOSX`, `.DS_Store`, `Thumbs.db`, OS extra fields; already-compressed entries stored as-is | 20–40% |
-| `MetadataStripper` | JPEG/WebP ExifInterface strip; PNG tEXt/iTXt/zTXt/eXIf chunk removal; PDF inline Author/Creator/Producer/XMP strip | N/A — privacy |
-| `CompressionStatsTracker` | Monthly inbound/outbound bytes saved, persisted to `/data/circle/compression/stats.json`, auto-resets on month rollover | N/A — dashboard |
-
-### Future Phases
-
-| Phase | Features |
-|-------|----------|
-| Phase 2 | ZSTD native backend; video transcoding (AV1/HEVC); audio (Opus voice / AAC music); Traffic Lobby outbound hook |
-| Phase 3 | Inference Service AI decisions — face/text preservation, semantic compression, smart cropping |
-| Phase 4 | Mesh deduplication, delta sync, progressive loading |
-
----
-
-## 7. SDPKT Titanium ✅ Phases 1–6 Complete
-
-**Version:** 1.0 | **Owner:** The Geek (Pty) Ltd | **Service name:** `circle.sdpkt`
-**Currency:** Shongololo (₷)
-
-Hardware-grade digital cash built into Circle OS at the system level. Phone-to-phone NFC transfers with no internet required. Keys never leave the TEE.
-
-### Implementation Phases
-
-| Phase | Description | Status | Commits |
-|-------|-------------|--------|---------|
-| **Ph 1** | Core Wallet: TEE keys, NFC P2P, signing/verification, balance management, basic UI | ✅ Done | frameworks/base `4d50b366`, vendor/circle `e6d80e4` |
-| **Ph 2** | Offline: transaction log, settlement queue, double-spend detection, sync protocol | ✅ Done | frameworks/base `26b28a9d`, vendor/circle `aba9497` |
-| **Ph 3** | Protection Engine: location rules + learning, stress detection (accelerometer + watch) | ✅ Done | frameworks/base `2e7d996b`, vendor/circle `101161b` |
-| **Ph 4** | Integration: Butler voice, Personality modes, lock screen quick pay, mesh settlement | ✅ Done | frameworks/base `df717722`, vendor/circle `4fff2b4` |
-| **Ph 5** | Polish: calibration UX, analytics, export/backup, protection log | ✅ Done | frameworks/base `68673054`, vendor/circle `7d530ea` |
-| **Ph 6** | Multi-device: NFC tap-to-pair, WearLinkManager, wearable stress data, device persistence | ✅ Done | frameworks/base `ff469b8f` + `9fc0ff49` |
-
-### Post-Phase Improvements
+#### Post-Phase Security Improvements
 
 | Commit | Description |
 |--------|-------------|
-| `2a19cc5a` | T1-03/07/08 — mesh frame routing, sensor permission check, revoke unused permissions |
+| `2450002d` | Community Defense correlation + Researcher API + Ed25519 sigs |
+| `995b16b6` | QuarantineManager JSONL persistence (flat-JSON → append-only log) |
+| `67ab42c0` | ResearcherApiService: replace in-memory IOC list with SQLite |
+| `d753ef08` | InfrastructureMapper: populate KNOWN_BAD_ASNS seed set |
+| `249aa4ce` | T2-02 — Replace Data Acuity placeholder Ed25519 key with real key |
+| `77e72459` | T2-03 — DataAcuityClient: WebSocket real-time threat push |
+| `a1e59fa1` | T2-04 — BehavioralSandbox: namespace isolation |
+| `729b3e5d` | Fix DataAcuityClient key override, BehavioralSandbox IPv6, netd retry |
+
+#### Traffic Lobby Post-Phase Improvements (vendor/circle)
+
+| Commit | Description |
+|--------|-------------|
+| `ab1085a` | T1-04 — Real IPv4 DPI packet loop + spyware alerting in `TrafficLobbyVpnService` |
+| `996154f` | Exclude Circle Mesh subnets from VPN tunnel (prevents mesh traffic interception) |
+
+---
+
+### 6. Circle OS Compression ✅ Phase 1 Complete, Phase 2 Partial
+
+**Commit:** frameworks/base `c910f488` (17 files, 1,629 insertions)
+
+**Pipeline (inbound):** scan → CDR → **compress** → clean+small file released to app
+
+| Engine | What it handles | Savings |
+|--------|----------------|---------|
+| `ImageCompressor` | JPEG/WebP quality re-encode; PNG lossless; GIF passthrough; EXIF fully stripped | 40–70% |
+| `DocumentCompressor` | PDF XMP strip; Office ZIP repack at DEFLATE-9; core.xml author/revision zeroed | 20–60% |
+| `ArchiveCompressor` | ZIP repack DEFLATE-9; drops `__MACOSX`, `.DS_Store`, OS extra fields | 20–40% |
+| `MetadataStripper` | JPEG/WebP ExifInterface; PNG tEXt/iTXt/zTXt/eXIf chunks; PDF inline metadata | privacy |
+| `CompressionStatsTracker` | Monthly inbound/outbound bytes saved → `/data/circle/compression/stats.json` | dashboard |
+
+#### Phase 2 Partial Work
+
+| Commit | Description |
+|--------|-------------|
+| `94d8800a` | Phase 2 PDF image recompression in `DocumentCompressor` |
+| `63378ef8` | Video/audio metadata stripping in `CdrProcessor` |
+
+#### Remaining Phase 2 Features
+
+| Feature | Notes |
+|---------|-------|
+| ZSTD native backend (libzstd JNI) | Not started |
+| Video transcoding (AV1/HEVC) | Not started |
+| Audio compression (Opus/AAC) | Not started |
+| Traffic Lobby outbound hook | Not started |
+
+---
+
+### 7. Circle OS Mesh Networking ✅ Core Complete
+
+Service: `circle.mesh` | `frameworks/base/services/core/java/com/circleos/server/mesh/`
+
+#### Implementation
+
+| Commit | Description |
+|--------|-------------|
+| `4c968fc8` | Phase B — BLE GATT server + client in `BluetoothLeTransport.java` for WiFi-IP bootstrap; `CircleMeshService` integration |
+| `8575c45f` | T1-02 — Real BLE GATT client in `PeerDiscovery` |
+| `d6a0947f` | T2-08 — Fix BLE service UUID to match `BluetoothLeTransport` |
+| `2a19cc5a` | T1-03 — Full `TYPE_MSG_*` / `TYPE_TX_*` / `TYPE_FILE_*` switch dispatch in `CircleMeshService`; `routeTxFrame()` → `SdpktTitaniumService.onMeshTxFrame()` |
+
+#### Sepolicy (vendor/circle `9998138`)
+- `sepolicy/circle_mesh.te`, `circle_service.te`, `file_contexts`, `property_contexts`
+
+#### Remaining
+
+| Feature | Notes |
+|---------|-------|
+| WiFi Direct transport | WiFi Direct (P2P) handshake not yet wired; BLE bootstrap works |
+| Store-and-forward | Architecture in place; full message queue deferred |
+| CircleMessages app | Not started |
+| CircleBeacon app | Not started |
+
+---
+
+### 8. Circle OS OTA Update System ✅ Phases 1–9 Complete
+
+Service: `circle.update` → `CircleUpdateService` | `frameworks/base/services/core/java/com/circleos/server/update/`
+
+#### Implementation Phases
+
+| Phase | Commit | Description |
+|-------|--------|-------------|
+| Ph 1–3 | (OS Phase 4) | Basic OTA check, download, apply; build properties |
+| Ph 4 | `92bb1190` | Mesh P2P OTA chunk delivery — `MeshOtaDownloader` |
+| Ph 5 | `a342e1ec` | A/B delta OTA delivery — `AbSlotManager`, `DeltaChecker`, `MeshOtaDownloader` |
+| Ph 6 | `779f47c0` | OS control plane — `OtaPolicyManager`, `UpdateTelemetry` |
+| Ph 7 | `f127f73a` | Remote command execution — `RemoteCommandProcessor` |
+| Ph 8 | `a1e99f55` | Maintenance windows + boot verification — `MaintenanceWindowChecker`, `BootVerifier` |
+| Ph 9 | `47a532b5` | Device enrollment + crash/ANR telemetry — `DeviceEnrollment`, `CrashReporter` |
+
+#### Build Config (vendor/circle)
+
+| Commit | Description |
+|--------|-------------|
+| `325470d` | `config/circleos_update.mk` — build-time OTA config |
+| `9998138` | SEPolicy for update + mesh services |
+
+---
+
+### 9. SDPKT Titanium ✅ Phases 1–6 Complete
+
+**Version:** 1.0 | **Service name:** `circle.sdpkt` | **Currency:** Shongololo (₷)
+
+#### Implementation Phases
+
+| Phase | Description | Commits |
+|-------|-------------|---------|
+| **Ph 1** | Core Wallet: TEE keys, NFC P2P, signing/verification, balance management, basic UI | frameworks/base `4d50b366`, vendor/circle `e6d80e4` |
+| **Ph 2** | Offline: transaction log, settlement queue, double-spend detection, sync protocol | frameworks/base `26b28a9d`, vendor/circle `aba9497` |
+| **Ph 3** | Protection Engine: location rules + learning, stress detection (accelerometer + watch) | frameworks/base `2e7d996b`, vendor/circle `101161b` |
+| **Ph 4** | Integration: Butler voice, Personality modes, lock screen quick pay, mesh settlement | frameworks/base `df717722`, vendor/circle `4fff2b4` |
+| **Ph 5** | Polish: calibration UX, analytics, export/backup, protection log | frameworks/base `68673054`, vendor/circle `7d530ea` |
+| **Ph 6** | Multi-device: NFC tap-to-pair, WearLinkManager, wearable stress data, device persistence | frameworks/base `ff469b8f` + `9fc0ff49` |
+
+#### Post-Phase Improvements
+
+| Commit | Description |
+|--------|-------------|
+| `2a19cc5a` | T1-03 — Mesh TX frame routing → `SdpktTitaniumService.onMeshTxFrame()` |
 | `a536b260` | T2-01 — HTTP settlement POST to `sleptonapi.thegeeknetwork.co.za/api/sdpkt/settle` |
-| (this session) | T6-01 — Secondary device spending limit enforcement in ProtectionEngine |
+| `cbbfb6d3` | T6-01 — Secondary device spending limit enforcement in `ProtectionEngine` + `NfcTransferRequest.senderDeviceId` |
 
-### T6-01: Secondary Device Spending Limits (this session)
-
-The `spendingLimitSats` field on `DeviceLink` was stored but never enforced at payment time.
-
-**Changes:**
-- `NfcTransferRequest.java` — added `senderDeviceId` field (null = primary, no limit)
-- `ProtectionEngine.java` — added `evaluateTransfer(amountCents, lockScreen, senderDeviceId)` overload; step 2.5 checks the linked device map and blocks if per-device limit exceeded
-- `SdpktTitaniumService.java` — wires `mLinkedDevices` provider into ProtectionEngine at Phase 6 boot; passes `request.senderDeviceId` through to `evaluateTransfer()`
-
-### Key Paths
-
-| Resource | Path |
-|----------|------|
-| AIDL + Parcelables | `frameworks/base/core/java/za/co/circleos/sdpkt/` |
-| System service | `frameworks/base/services/core/java/com/circleos/server/sdpkt/` |
-| Transaction log | `/data/circle/sdpkt/pending.jsonl` |
-| Location history | `/data/circle/sdpkt/locations.db` (local only) |
-| SDPKT app | `vendor/circle/apps/SdpktTitanium/` |
-
-### Remaining (Phase 7+)
+#### Remaining (Phase 7+)
 
 | Item | Notes |
 |------|-------|
 | Wear OS DataLayer API | WearLinkManager uses broadcasts now; full DataLayer sync deferred |
-| Settlement backend validation | Test HTTP POST to sleptonapi in staging; confirm 200/409 handling |
+| Settlement backend validation | Test HTTP POST in staging; confirm 200/409 handling |
+
+---
+
+### 10. Butler App ✅ Enhanced
+
+**Location:** `vendor/circle/apps/Butler/`
+
+| Commit | Description |
+|--------|-------------|
+| `6819446` | Phase 4 — initial Butler chat app + inference client library |
+| `a1093b5` | Circle Mesh P2P chat — `MeshActivity` + manifest updates |
+| `f075a45` | AI call screening service — `ButlerCallScreeningService` |
+
+---
+
+### 11. CircleSettings App ✅ Complete
+
+**Location:** `vendor/circle/apps/CircleSettings/`
+
+| Commit | Description |
+|--------|-------------|
+| `7aadec3` | T2-06 — Initial APK with `Android.bp`, manifest, `AutoRevokeJobService` |
+| `cffc105` | Full UI — OTA status, channel switcher, privacy summary, auto-revoke trigger |
+
+---
+
+## Build System
+
+### Boot Jar Allow List Fix
+- **File:** `build/soong/scripts/check_boot_jars/package_allowed_list.txt`
+- **Commit:** `37cc7eb` (build/soong repo)
+- **Fix:** Added `za\.co\.circleos` and `za\.co\.circleos\..*` — required for all CircleOS packages in `framework.jar`
+
+### macOS Build Fix
+- **File:** `external/cronet/third_party/libc++abi/src/src/cxa_thread_atexit.cpp`
+- **Fix:** `#ifndef __APPLE__` guards around `__cxa_thread_atexit_impl` weak symbol declaration and runtime check — resolves `ld64.lld: undefined symbol` on macOS
+
+### Current Build
+- **Target:** `circle_emulator-ap2a-userdebug` (x86_64 emulator image)
+- **Status:** Running — past boot jar check, in final APEX/image assembly phase
+
+---
+
+## Key Paths
+
+| Resource | Path |
+|----------|------|
+| AIDL + Parcelables (inference) | `frameworks/base/core/java/za/co/circleos/inference/` |
+| AIDL + Parcelables (sdpkt) | `frameworks/base/core/java/za/co/circleos/sdpkt/` |
+| AIDL + Parcelables (security) | `frameworks/base/core/java/za/co/circleos/security/` |
+| AIDL + Parcelables (compression) | `frameworks/base/core/java/za/co/circleos/compression/` |
+| AIDL + Parcelables (mesh) | `frameworks/base/core/java/za/co/circleos/mesh/` |
+| Java services | `frameworks/base/services/core/java/com/circleos/server/` |
+| JNI bridge | `frameworks/base/services/core/jni/circle_inference_jni.cpp` |
+| Rust layer | `frameworks/base/services/core/rust/circle_inference/` |
+| SystemServer | `frameworks/base/services/java/com/android/server/SystemServer.java` |
+| Manifest | `frameworks/base/core/res/AndroidManifest.xml` |
+| Butler app | `vendor/circle/apps/Butler/` |
+| CircleSettings app | `vendor/circle/apps/CircleSettings/` |
+| InferenceBridge app | `vendor/circle/apps/InferenceBridge/` |
+| PersonalityTile app | `vendor/circle/apps/PersonalityTile/` |
+| PersonalityEditor app | `vendor/circle/apps/PersonalityEditor/` |
+| SdpktTitanium app | `vendor/circle/apps/SdpktTitanium/` |
+| TrafficLobby VPN app | `vendor/circle/apps/TrafficLobby/` |
+| CircleTheme overlay | `vendor/circle/overlay/CircleTheme/` |
+| Inference client lib (Android) | `vendor/circle/libs/inference-client/` |
+| InferenceBridge docs | `vendor/circle/docs/inference-service-integration.md` |
+| .NET inference client | `TheGeekNetwork/code/Shared/TheGeekNetwork.Shared.CircleInference/` |
+| .NET design tokens | `TheGeekNetwork/code/Shared/TheGeekNetwork.Shared.CircleDesign/` |
+| Geek Network apps | `/Users/admin/Code/Dev/TheGeekNetwork/Apps/` |
+| Model dirs | `/system/circle/models/` (bundled), `/data/circle/models/` (downloaded) |
+| Threat feeds | `/data/circle/security/feeds/` |
+| SDPKT transaction log | `/data/circle/sdpkt/pending.jsonl` |
+| Compression stats | `/data/circle/compression/stats.json` |
 
 ---
 
@@ -436,28 +413,23 @@ The `spendingLimitSats` field on `DeviceLink` was stored but never enforced at p
 
 - All Circle services are Java (not Kotlin) — matches existing 16 services
 - Rust layer goes via Soong (platform-level), not NDK
-- BitNet.cpp added in Phase 3; `llama_native`/`bitnet_native` feature flags gate real FFI
+- BitNet.cpp added in Phase 3; `llama_native`/`bitnet_native` feature flags gate real FFI; T1-01 replaced the JNI stub with a real llama.cpp generation loop
 - `libcircle_inference.so` is the shared library loaded by `LlamaCppBackend.java`
-- Geek Network apps are mobile apps in a separate repo; CircleOS inference integration is a separate future task per app
 - InferenceBridge is a platform-signed privileged app (`platform` cert); token lives in memory only — never persisted
 - `.NET` client uses `Platforms/Android/` vs `Platforms/Default/` conditional compilation for token acquisition
 - Inference ↔ Personality integration complete: `GET /api/personality/mode` returns active mode; `.NET` `GetPersonalityModeAsync()` wraps it
-- Mode-aware system prompt pattern: read `mode.Id`, switch on `"work" | "trader" | "developer" | "secure" | ...`
 - Design System is a `runtime_resource_overlay` (platform cert) targeting the `android` package — no code, resources only
 - Comfortaa variable font (OFL) bundled — `prebuilt/fonts/comfortaa_variable.ttf`, uses `fontVariationSettings` for 400/500/700 weights (API 26+)
-- `.NET` design tokens: `CircleModeTheme.BundleFor(mode.Id)` returns accent + pressed/ripple colours + Elder/Secure/Night flags in one call
-- Accessibility audit doc at `docs/design-system-accessibility-audit.md` — all issues resolved; A-01 fixed (`#B8B8B8` secondary text, 4.56:1 on card surface)
 - Security Phase 1: `CircleFileDmzService` (`circle.file_dmz`); permissions `ACCESS_FILE_DMZ` (normal) + `MANAGE_TRAFFIC_LOBBY` (signature)
-- Security Phase 2: `QuarantineManager` (`circle.quarantine`) + `CommunityDefenseService` (`circle.community_defense`); permissions `ACCESS_QUARANTINE` (normal) + `MANAGE_QUARANTINE` (signature) + `COMMUNITY_DEFENSE_OPT_IN` (normal)
-- Security Phase 3: `ResearcherApiService` (`circle.researcher_api`); permission `RESEARCHER_API` (signature|privileged); STIX 2.1 bundle output via `IocBundle.stixJson`
-- Traffic Lobby is a privileged platform-signed app (local VPN only, no external routing); Phase 2 will add TLS DPI once certificate strategy is decided
-- Threat feeds at `/data/circle/security/feeds/c2_ips.txt`, `c2_domains.txt`, `malware_hashes.txt`; `DataAcuityClient` fetches from `https://feeds.dataacuity.circleos.co.za`; Ed25519 signature verification is Phase 3 placeholder (always true in Phase 2)
-- CDR Phase 1: images fully sanitized (Bitmap re-encode); Phase 2 extended: Office (strip VBA, sanitize macro refs), HTML (strip script/iframe/object/on*/javascript:), ZIP (recursive depth-3, drop executables), media passthrough
-- `BehavioralSandbox` is static analysis (PE/ELF magic, VBA, PowerShell, Base64>200, URL/IP), not a micro-VM — full VM execution deferred to a future phase
-- `CampaignCorrelator` uses /24 subnet match, beacon interval ±5% tolerance, 72h temporal window; MITRE ATT&CK TTP IDs mapped per IOC type (T1071/T1568/T1027/T1102)
-- `InfrastructureMapper` predicts entire /24 subnet when ≥3 confirmed IPs observed (SUBNET_PREDICTION_THRESHOLD=3); nameserver clustering links related domains
-- Compression service (`circle.compression`) integrated as Stage 4 of the DMZ inbound pipeline; compresses at TIER_VISUALLY_LOSSLESS by default; savings reported in `result.findings`
-- Compression skip threshold: if compressed ≥ 95% of original, file returned unchanged (STATUS_SKIPPED)
-- `MetadataStripper` strips EXIF GPS/device/author/timestamps (ExifInterface), PNG text chunks (tEXt/iTXt/zTXt/eXIf), PDF XMP + inline metadata; outbound only by default
-- Compression Phase 2 planned: ZSTD native (libzstd JNI), video AV1/HEVC, audio Opus/AAC, Traffic Lobby outbound hook
-- Compression Phase 3 planned: Inference Service AI quality decisions (face/text region preservation, semantic compression)
+- Security Phase 2: `QuarantineManager` (`circle.quarantine`) + `CommunityDefenseService` (`circle.community_defense`)
+- Security Phase 3: `ResearcherApiService` (`circle.researcher_api`); permission `RESEARCHER_API` (signature|privileged); STIX 2.1 via `IocBundle.stixJson`
+- Traffic Lobby is a privileged platform-signed app (local VPN only); T1-04 added real IPv4 DPI packet loop; mesh subnets excluded from tunnel
+- `BehavioralSandbox` is static analysis (not a micro-VM); T2-04 added namespace isolation
+- `DataAcuityClient` fetches from `https://feeds.dataacuity.circleos.co.za`; T2-02 replaced placeholder Ed25519 key; T2-03 added WebSocket real-time push
+- `CampaignCorrelator`: /24 subnet, beacon interval ±5%, 72h window; MITRE ATT&CK TTP IDs (T1071/T1568/T1027/T1102)
+- `InfrastructureMapper`: predicts /24 when ≥3 IPs confirmed; KNOWN_BAD_ASNS seed set populated (T-commit)
+- Compression: TIER_VISUALLY_LOSSLESS by default; skip if compressed ≥95% of original; Phase 2 PDF image recompression + video/audio metadata stripping done
+- SDPKT: `NfcTransferRequest.senderDeviceId` feeds `ProtectionEngine` step 2.5 for per-device limit enforcement; settlement HTTP POST to sleptonapi
+- OTA Phases 4-9 are an enterprise fleet management layer built on top of the base OTA service — mesh chunk delivery, A/B slots, remote commands, device enrollment, crash reporting
+- CircleSettings: `AutoRevokeJobService` runs the 30-day idle permission scan from `CirclePrivacyManagerService.revokeUnusedPermissions()`
+- SEPolicy covers: circle_mesh domain, circle_service domain, file_contexts for `/data/circle/`, property_contexts for `circle.*`
