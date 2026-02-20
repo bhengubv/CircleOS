@@ -78,20 +78,21 @@ Repo: `/Users/admin/Code/Dev/TheGeekNetwork/` — `code/Shared/TheGeekNetwork.Sh
 | `GetPersonalityModeAsync()` | .NET client method returning `PersonalityModeInfo` | TheGeekNetwork `eb36635` |
 | .NET `README.md` | Mode-aware system prompt pattern (C# switch expression), polling example, mode ID reference table | TheGeekNetwork `eb36635` |
 
-#### Inference Ecosystem — Geek Network Apps ⬜ Not Started
+#### Inference Ecosystem — Geek Network Apps ✅ Partial Complete
 
 The Geek Network apps live in a separate repo at `/Users/admin/Code/Dev/TheGeekNetwork/`.
-They will be integrated as native Android apps built into the CircleOS image.
 Inference integration for each app is a separate future task.
 
 | App | Repo Location | AI Use Case | Status |
 |-----|--------------|-------------|--------|
 | Butler | `vendor/circle/apps/Butler` | General-purpose assistant, conversational UI | ✅ Done (Phase 4) |
-| SidePocket (SDPKT) | `TheGeekNetwork/Apps/SidePocket` | Transaction explanations, fraud detection | ⬜ Not Started |
-| TagMe | `TheGeekNetwork/Apps/TagMe` | Smart tagging suggestions | ⬜ Not Started |
-| igotplans | `TheGeekNetwork/Apps/igotplans` | Job matching, CV summarisation | ⬜ Not Started |
+| SidePocket (SDPKT) | `TheGeekNetwork/Apps/SidePocket` | Budget analysis, transaction categorisation, streaming Q&A | ✅ Done — `c886b3a` |
+| TagMe | `TheGeekNetwork/Apps/TagMe` | Nearby POI/event recommendations, location assistant | ✅ Done — `c886b3a` |
+| TheJobCenter | `TheGeekNetwork/Apps/TheJobCenter` | Job summary, skill gap, profile improvement, SA market context | ✅ Done — `c886b3a` |
 | MatchMaster | `TheGeekNetwork/Apps/MatchMaster` | TBD | ⬜ Not Started |
 | BhenguBV | `TheGeekNetwork/Apps/BhenguBV` | TBD | ⬜ Not Started |
+
+**Commit `c886b3a` (TheGeekNetwork):** Each app received: `CircleInference` project reference in `.csproj`, `com.circleos.permission.ACCESS_INFERENCE` in `AndroidManifest.xml`, `CircleInferenceClient` singleton + scoped `I<Domain>AssistantService`/`<Domain>AssistantService` in `MauiProgram.cs`, and `Services/I<Domain>AssistantService.cs` + `Services/<Domain>AssistantService.cs` with SA-context system prompts and streaming `AskAsync(IAsyncEnumerable<string>)` methods.
 
 ---
 
@@ -228,14 +229,17 @@ Enables users to activate curated "modes" that configure features, apps, and set
 | `94d8800a` | Phase 2 PDF image recompression in `DocumentCompressor` |
 | `63378ef8` | Video/audio metadata stripping in `CdrProcessor` |
 
-#### Remaining Phase 2 Features
+#### Phase 2 — ✅ Complete
+
+| Commit | Description |
+|--------|-------------|
+| `5059ac15` | C2-01 — `VideoCompressor.java` (HEVC via MediaCodec, 2Mbps/1Mbps targets, audio passthrough); `AudioCompressor.java` (AAC-LC 96kbps/64kbps via MediaCodec); `ZstdCompressor.java` (JNI-based ZSTD with DEFLATE-9 fallback; loads `libcircle_zstd_jni.so`); `CircleCompressionService`: registered with `LocalServices`, added `isVideo()`/`isAudio()` dispatch, `compressOutbound()` Traffic Lobby hook, extended `guessMime()` for video/audio |
+
+#### Remaining Phase 2 Items
 
 | Feature | Notes |
 |---------|-------|
-| ZSTD native backend (libzstd JNI) | Not started |
-| Video transcoding (AV1/HEVC) | Not started |
-| Audio compression (Opus/AAC) | Not started |
-| Traffic Lobby outbound hook | Not started |
+| ZSTD JNI native library | `ZstdCompressor.java` loads `libcircle_zstd_jni.so`; JNI C file needs `cc_library_shared` in Android.bp and `external/zstd` dep |
 
 ---
 
@@ -255,13 +259,17 @@ Service: `circle.mesh` | `frameworks/base/services/core/java/com/circleos/server
 #### Sepolicy (vendor/circle `9998138`)
 - `sepolicy/circle_mesh.te`, `circle_service.te`, `file_contexts`, `property_contexts`
 
+#### Post-Phase Improvements
+
+| Commit | Description |
+|--------|-------------|
+| `66c70966` | M1-01 — `WifiDirectTransport.setLocalIp()`: includes local IPv4 in DNS-SD TXT "ip" field; discovery callback extracts "ip" from TXT record instead of using MAC address (which broke TCP); `CircleMeshService` feeds local IP to both BLE GATT + WiFi Direct DNS-SD; `broadcastTextMessage()` also delivers to `za.co.circleos.messages` |
+
 #### Remaining
 
 | Feature | Notes |
 |---------|-------|
-| WiFi Direct transport | WiFi Direct (P2P) handshake not yet wired; BLE bootstrap works |
 | Store-and-forward | Architecture in place; full message queue deferred |
-| CircleMessages app | Not started |
 | CircleBeacon app | Not started |
 
 ---
@@ -323,7 +331,26 @@ Service: `circle.update` → `CircleUpdateService` | `frameworks/base/services/c
 
 ---
 
-### 10. Butler App ✅ Enhanced
+### 10. CircleMessages App ✅ Complete
+
+**Location:** `vendor/circle/apps/CircleMessages/` | **Commit:** vendor/circle `27f0426`
+
+Platform-signed privileged Android app (`za.co.circleos.messages`) — dedicated mesh P2P messaging UI, built with CircleOS Design System colors.
+
+| Component | Description |
+|-----------|-------------|
+| `MessageDatabase.java` | SQLite: `messages(id, peer_id, direction, body, timestamp_ms, read)`; `getConversations()` summary; `getMessages(peerId)` thread; `markRead(peerId)` |
+| `MeshMessageReceiver.java` | BroadcastReceiver for `ACTION_MESSAGE_RECEIVED`; stores to DB + posts notification with PendingIntent to ConversationActivity |
+| `MainActivity.java` | Conversation list from DB; peer count via `ICircleMeshService.getPeerCount()`; tap → ConversationActivity |
+| `ConversationActivity.java` | Chat thread; sends via `ICircleMeshService.sendMessage()` (msgType `0x10` = TYPE_MSG_TEXT); left/right bubble alignment |
+| Layouts | `activity_main.xml`, `activity_conversation.xml`, `item_conversation.xml`, `item_message.xml` |
+| Drawables | `bg_bubble_inbound.xml` (grey rounded), `bg_bubble_outbound.xml` (Circle Deep `#1A1F36`), `bg_unread_badge.xml` (Circle Gold oval), `ic_messages.xml` |
+
+`CircleMeshService.broadcastTextMessage()` updated to deliver to `za.co.circleos.messages` (alongside `za.co.circleos.butler`).
+
+---
+
+### 12. Butler App ✅ Enhanced
 
 **Location:** `vendor/circle/apps/Butler/`
 
@@ -335,7 +362,7 @@ Service: `circle.update` → `CircleUpdateService` | `frameworks/base/services/c
 
 ---
 
-### 11. CircleSettings App ✅ Complete
+### 13. CircleSettings App ✅ Complete
 
 **Location:** `vendor/circle/apps/CircleSettings/`
 
@@ -359,7 +386,10 @@ Service: `circle.update` → `CircleUpdateService` | `frameworks/base/services/c
 
 ### Current Build
 - **Target:** `circle_emulator-ap2a-userdebug` (x86_64 emulator image)
-- **Status:** Running — past boot jar check, in final APEX/image assembly phase
+- **Command:** `make droidcore -j` (note: macOS uses `sysctl -n hw.ncpu`, not `nproc`)
+- **Status:** Running — Soong analysis phase (soong_build at ~500% CPU); compilation will follow
+- **Log:** `/tmp/circle_droidcore.log`
+- **Build task:** background task `b65a4fe`
 
 ---
 
@@ -377,6 +407,7 @@ Service: `circle.update` → `CircleUpdateService` | `frameworks/base/services/c
 | Rust layer | `frameworks/base/services/core/rust/circle_inference/` |
 | SystemServer | `frameworks/base/services/java/com/android/server/SystemServer.java` |
 | Manifest | `frameworks/base/core/res/AndroidManifest.xml` |
+| CircleMessages app | `vendor/circle/apps/CircleMessages/` |
 | Butler app | `vendor/circle/apps/Butler/` |
 | CircleSettings app | `vendor/circle/apps/CircleSettings/` |
 | InferenceBridge app | `vendor/circle/apps/InferenceBridge/` |
