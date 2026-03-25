@@ -474,6 +474,54 @@ DATABASE:           SQLCipher (256-bit AES)
 
 ---
 
+## CIRCLEOS NEXT — STRATEGIC DIRECTION (2026-03-25)
+
+### Decision: OpenHarmony as new base OS
+
+CircleOS is evolving from an AOSP (Android 14) fork to an **OpenHarmony-based** OS. The AOSP version in this repo becomes the reference/archive. A new `circleos-next` repo will hold the OpenHarmony-based implementation.
+
+### Why OpenHarmony
+- Runs on devices from 128KB RAM (IoT) to flagship phones — AOSP needs 2GB+
+- Built-in distributed networking (DSoftBus) — natural fit for Aether mesh
+- RISC-V production ready — aligns with custom hardware vision
+- Zero Google dependency — no GMS baggage
+- Component-based — strip to minimum for $30-50 phones
+- ArkTS (TypeScript-based) — Aether protocol already has TypeScript implementation
+
+### What carries over from this repo
+- **100% portable:** Privacy framework concepts, mesh protocol (Aether), threat intelligence, offline-first design, AI inference (llama.cpp), app store policies, age modes, personality engine, brand design system
+- **Aether protocol is the key asset** — open source at `/Users/admin/Code/Dev/aether-protocol/`, 8 language implementations (C for OS daemon, TypeScript for ArkTS native apps, Rust for security, .NET for Geek Network apps). Transport-agnostic — just needs OpenHarmony BLE/NearLink transports.
+- **Not portable:** AOSP framework patches, SELinux policies, Soong build system, ART modifications, device trees
+
+### Device roadmap
+1. **Phase 1 (months 3-6):** Mid-range phone (Xiaomi/Samsung A-series) — CircleOS Next with privacy + mesh + Geek Network Blazor apps in WebView
+2. **Phase 2 (months 7-10):** Ultra-low-cost $30-50 phone (MediaTek MT6739/MT6761) — stripped OpenHarmony, essential apps only, mesh critical
+3. **Phase 3 (months 11-18):** Custom RISC-V hardware with NearLink + secure element
+4. **Phase 4 (months 18+):** Multi-device — watch, TV, IoT gateway, vehicle
+
+### App strategy
+- **Now:** Geek Network apps (SDPKT, Bruh, TxTMe, KiffStore, SleptOn) ship as Blazor WebView — no rewrite
+- **Later:** Rewrite to native ArkTS as OS matures
+- **Android compat:** Compatibility layer for WhatsApp, banking, M-Pesa (via Eclipse Oniro / Jolla AppSupport)
+
+### Africa-first principles
+1. Offline by default — mesh fills the gap
+2. Data-frugal — compress everything, never auto-download
+3. Multi-SIM native — dual/triple SIM, USSD integration
+4. Load shedding aware — battery management during outages
+5. Low-literacy friendly — voice-first UI, icon-heavy
+6. Local languages — Zulu, Xhosa, Sotho, Swahili, Yoruba, Amharic day one
+7. Financial inclusion — SDPKT wallet offline via NFC
+8. No surveillance tax — no data collection, no ads, ever
+
+### Build blocker
+Cannot build on MacInCloud (72GB free, need 100GB+). Need dedicated build server: Hetzner AX102 (~€130/mo, 12-core Ryzen, 64GB RAM, 2x1TB NVMe) or equivalent.
+
+### Full plan
+`/Users/admin/.claude/plans/parsed-growing-clover.md`
+
+---
+
 ## CODE STANDARDS
 
 ### Kotlin (Circle OS)
