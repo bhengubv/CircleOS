@@ -88,8 +88,8 @@ DATABASE:     SQLite (SQLCipher for encrypted)
 ### Data Acuity (Backend)
 
 ```
-PLATFORM:     .NET 10 / ASP.NET Core
-LANGUAGES:    C#
+PLATFORM:     Python 3.11+ / FastAPI
+LANGUAGES:    Python
 DATABASE:     PostgreSQL 16
 CACHE:        Redis 7
 SEARCH:       Elasticsearch 8
@@ -179,52 +179,26 @@ packages/apps/
         └── communitydefense/
 ```
 
-### Data Acuity (Backend)
+### Data Acuity (Backend) — Separate Repo
+
+> **Note:** Data Acuity lives in `/Users/admin/Code/Dev/dataacuity/`, NOT in this repo.
+> See `dataacuity/CLAUDE.md` for full details.
 
 ```
-DataAcuity/
-├── src/
-│   ├── DataAcuity.Api/                 # Web API
-│   │   ├── Controllers/
-│   │   │   ├── ThreatController.cs     # POST /threat/submit
-│   │   │   ├── CanaryController.cs     # /canary/*
-│   │   │   ├── IocController.cs        # /ioc/*
-│   │   │   ├── CampaignController.cs   # /campaign/*
-│   │   │   └── StatsController.cs      # /stats/*
-│   │   └── Middleware/
-│   │       ├── RateLimitingMiddleware.cs
-│   │       └── ApiKeyAuthMiddleware.cs
-│   │
-│   ├── DataAcuity.Core/                # Domain logic
-│   │   ├── Entities/
-│   │   │   ├── IOC.cs
-│   │   │   ├── Campaign.cs
-│   │   │   ├── ThreatReport.cs
-│   │   │   └── CanaryToken.cs
-│   │   └── Services/
-│   │       ├── IntakeService.cs        # Process reports
-│   │       ├── AnalysisEngine.cs       # Correlate threats
-│   │       ├── FeedGenerator.cs        # Generate feeds
-│   │       └── CorrelationEngine.cs    # Link IOCs
-│   │
-│   ├── DataAcuity.Infrastructure/      # Data access
-│   │   ├── Data/
-│   │   │   └── DataAcuityDbContext.cs
-│   │   └── ExternalFeeds/
-│   │       ├── AbuseCHFeed.cs
-│   │       └── PhishTankFeed.cs
-│   │
-│   └── DataAcuity.Canary/              # Canary servers
-│       ├── EmailServer/
-│       ├── DnsServer/
-│       └── WebBeaconHandler/
-│
-├── tests/
-│   ├── DataAcuity.UnitTests/
-│   └── DataAcuity.IntegrationTests/
-│
-└── docker/
-    └── docker-compose.yml
+dataacuity/
+├── suite/                    # Master orchestration (Traefik, Keycloak)
+├── markets/                  # Financial markets data (OpenBB)
+├── maps/                     # Geospatial platform (PostGIS, OSRM)
+├── api-gateway/              # Unified API gateway
+├── monitoring/               # Prometheus, Grafana, Loki
+├── data-warehouse/           # Analytics PostgreSQL
+├── dbt/                      # Data transformation
+├── superset/                 # BI dashboards
+├── n8n/                      # Workflow automation
+├── twenty/                   # CRM
+├── morph/                    # File converter
+├── ai-brain/                 # Ollama + Open WebUI
+└── portal/                   # Landing page
 ```
 
 ---
@@ -401,50 +375,101 @@ DATABASE:           SQLCipher (256-bit AES)
 
 ---
 
-## IMPLEMENTATION PRIORITIES
+## STATUS AUDIT (2026-03-25)
 
-### Phase 1: Foundation (Week 1-2)
+### What's Complete (all confirmed via session state)
 ```
-□ ThreatIntelService (local threat DB)
-□ Threat feed sync (download from Data Acuity)
-□ Basic firewall integration (block known-bad)
-□ Data Acuity API scaffolding
-```
-
-### Phase 2: Firewall (Week 3-4)
-```
-□ CircleFirewallService (VPN-based)
-□ PolicyEngine (per-app rules)
-□ DNS interceptor
-□ Connection logging
-□ Traffic Lobby (quarantine)
-```
-
-### Phase 3: Intelligence (Week 5-6)
-```
-□ ThreatScanner (YARA rules)
-□ ThreatReporter (submit to Data Acuity)
-□ CanaryManager (token generation)
-□ Data Acuity intake service
+✅ OS Core Privacy Framework (Phases 1-5)
+✅ Inference Service (Phases 1-4) — llama.cpp + BitNet, Rust JNI, InferenceBridge
+✅ Personality Engine (Phases 1-5) — 20+ modes, auto-switch, custom modes
+✅ Design System — 50 files, mode overlays, Comfortaa font, a11y audit
+✅ Security Architecture (Phases 1-3) — File DMZ, CDR, Traffic Lobby, threat feeds, malware jail, STIX 2.1
+✅ Compression (Phases 1-2) — image/doc/archive/video/audio, ZSTD, metadata stripping
+✅ Mesh Networking (core) — BLE GATT + WiFi Direct, gossip routing, crypto
+✅ OTA Updates (Phases 1-9) — mesh P2P delivery, A/B delta, remote commands, enrollment
+✅ SDPKT Titanium (Phases 1-6) — TEE wallet, NFC P2P, offline TX, multi-device
+✅ Apps: CircleMessages, Butler, CircleSettings, InferenceBridge, PersonalityTile/Editor, SdpktTitanium, TrafficLobby
+✅ .NET cross-platform: CircleInference client, CircleDesign tokens, 3 Geek Network app integrations
+✅ Docs: MkDocs site, feature pages, press kit, installation guides
 ```
 
-### Phase 4: Malware Jail (Week 7-8)
+### What's NOT Done
 ```
-□ MalwareJailService
-□ HoneypotManager (fake data)
-□ SyscallInterceptor (seccomp)
-□ C2Sinkhole (fake C2)
-□ IntelCollector
+❌ Build not confirmed — last status was "Soong analysis phase" (Feb 20). No working emulator image verified.
+❌ No automated tests — zero CTS/unit tests for any Circle OS service
+❌ ZSTD JNI native library — ZstdCompressor.java loads libcircle_zstd_jni.so but Android.bp entry not created
+❌ Store-and-forward for mesh — architecture in place, message queue deferred
+❌ CircleBeacon emergency app — not started
+❌ SDPKT settlement backend validation — HTTP POST to staging not tested e2e
+❌ No CI/CD — 3 GitHub workflows exist but AOSP needs a Linux build server (not GitHub Actions)
+❌ Data Acuity backend mismatch — CLAUDE.md describes .NET backend, actual implementation is Python/Docker in dataacuity repo
+❌ a.out committed to aosp/ — stale binary, should be gitignored
+❌ /Volumes/AndroidOut/out symlink — build output on external volume, not portable
 ```
 
-### Phase 5: Mesh (Week 9-12)
+### IMPLEMENTATION PRIORITIES (Updated 2026-03-25)
+
+**Original phases are DONE.** Remaining work:
+
+### Low-Hanging Fruit (can do now, minimal effort)
+
 ```
-□ CircleMeshService
-□ WiFi Direct transport
-□ Bluetooth transport
-□ Routing table
-□ Store-and-forward
-□ CircleMessages app
+1. Clean up a.out from aosp/ — add to .gitignore, git rm
+   Effort: 2 minutes
+
+2. Add ZSTD Android.bp entry — cc_library_shared for libcircle_zstd_jni.so
+   Effort: 30 minutes (Android.bp boilerplate + link external/zstd)
+
+3. Fix Data Acuity architecture docs — update this file to reflect that
+   Data Acuity backend is Python/FastAPI/Docker (in dataacuity repo),
+   NOT .NET/C# as described in the directory structure and code standards sections
+   Effort: 15 minutes
+
+4. Update session state — mark build status, remove stale "Running" state
+   Effort: 10 minutes
+
+5. Settlement backend test — send test HTTP POST from emulator/device
+   to sleptonapi.thegeeknetwork.co.za/api/sdpkt/settle and verify 200/409
+   Effort: 15 minutes (once build works)
+```
+
+### Next Priorities (require more effort)
+
+```
+6. Verify build — CANNOT build on MacInCloud (57GB free, need 250GB+).
+   AOSP source is 138GB, out/ symlink to /Volumes/AndroidOut/ (not mounted).
+   Need a dedicated build server or the original dev machine with the
+   AndroidOut volume attached.
+   Blocker: Disk space + build volume
+
+7. Add unit tests for security services — CDR processor, threat scanner,
+   quarantine manager, behavioral sandbox. These are pure Java, testable
+   without a running device.
+   Effort: 1-2 days
+
+8. Complete store-and-forward for mesh — queue messages when peers are
+   offline, deliver when they reconnect. Architecture exists in MessageStore.
+   Effort: 1-2 days
+
+9. Build CircleBeacon app — emergency beacon using mesh network for
+   offline SOS. Should integrate with PanikAPI when internet available.
+   Effort: 2-3 days
+
+10. Set up build server — .106 is too small (2 CPU, 23GB RAM).
+    AOSP needs 16+ cores, 64GB RAM, 500GB SSD minimum.
+    Options: dedicated hardware, cloud instance (Hetzner AX102 ~€130/mo),
+    or GitHub-hosted large runners.
+    Effort: 1 day setup + ongoing cost
+```
+
+### Future Phases
+```
+11. Device porting — GSI (Generic System Image) for Treble devices,
+    Huawei P30 Lite (reference hard-mode device)
+12. Circle Store integration with SleptOnAPI — app distribution
+13. Data Acuity threat feed production pipeline — connect to dataacuity
+    repo services (Superset dashboards, threat correlation)
+14. Hardware partnership — RISC-V native device with NearLink
 ```
 
 ---
@@ -475,39 +500,31 @@ fun String.toSha256(): String =
         .toHexString()
 ```
 
-### C# (Data Acuity)
+### Python (Data Acuity)
 
-```csharp
-// Use records for DTOs
-public record ThreatReportDto(
-    string SchemaVersion,
-    string ReportType,
-    string Country,
-    DateTime Timestamp,
-    IndicatorsDto Indicators
-);
+```python
+# Use FastAPI with Pydantic models
+from pydantic import BaseModel
 
-// Use async/await everywhere
-public async Task<SubmitResponse> ProcessReport(ThreatReportDto report)
-{
-    await ValidateAsync(report);
-    var id = await _db.InsertAsync(report);
-    await _queue.EnqueueAsync(new AnalysisJob(id));
-    return new SubmitResponse { Status = "accepted", ReportId = id };
-}
+class ThreatReportDto(BaseModel):
+    schema_version: str
+    report_type: str
+    country: str
+    timestamp: datetime
+    indicators: IndicatorsDto
 
-// Use dependency injection
-public class IntakeService : IIntakeService
-{
-    private readonly IDbContext _db;
-    private readonly IAnalysisQueue _queue;
-    
-    public IntakeService(IDbContext db, IAnalysisQueue queue)
-    {
-        _db = db;
-        _queue = queue;
-    }
-}
+# Use async endpoints
+@app.post("/threat/submit")
+async def submit_report(report: ThreatReportDto):
+    await validate(report)
+    report_id = await db.insert(report)
+    await queue.enqueue(AnalysisJob(report_id))
+    return {"status": "accepted", "report_id": report_id}
+
+# Use dependency injection
+async def get_db() -> AsyncGenerator[Database, None]:
+    async with database_pool.acquire() as conn:
+        yield conn
 ```
 
 ---
