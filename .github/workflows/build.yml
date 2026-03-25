@@ -1,10 +1,8 @@
 name: CircleOS Build
 
 on:
-  push:
-    branches: [ main, circle-14.0 ]
-  pull_request:
-    branches: [ main, circle-14.0 ]
+  # AOSP build requires 250GB+ disk and 64GB+ RAM — cannot run on GitHub Actions runners.
+  # Use dedicated build server instead. Keep workflow_dispatch for future self-hosted runner.
   workflow_dispatch:
 
 jobs:
