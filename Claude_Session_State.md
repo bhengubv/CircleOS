@@ -387,9 +387,8 @@ Platform-signed privileged Android app (`za.co.circleos.messages`) — dedicated
 ### Current Build
 - **Target:** `circle_emulator-ap2a-userdebug` (x86_64 emulator image)
 - **Command:** `make droidcore -j` (note: macOS uses `sysctl -n hw.ncpu`, not `nproc`)
-- **Status:** Running — Soong analysis phase (soong_build at ~500% CPU); compilation will follow
-- **Log:** `/tmp/circle_droidcore.log`
-- **Build task:** background task `b65a4fe`
+- **Status:** NOT RUNNING — build was in progress on Feb 20 but log (`/tmp/circle_droidcore.log`) no longer exists. Cannot rebuild on MacInCloud (57GB free, AOSP needs 250GB+). `out/` symlinks to `/Volumes/AndroidOut/out` (volume not mounted on this machine).
+- **Blocker:** Need dedicated build server or original dev machine with AndroidOut volume attached.
 
 ---
 
