@@ -514,6 +514,27 @@ CircleOS is evolving from an AOSP (Android 14) fork to an **OpenHarmony-based** 
 7. Financial inclusion — SDPKT wallet offline via NFC
 8. No surveillance tax — no data collection, no ads, ever
 
+### Wolverine Self-Healing Integration
+
+Wolverine (The Geek Network's self-healing system) is now a full pipeline:
+Error → classify → auto-heal or escalate → GitHub Issue → BigBruh approval gates → deploy → verify.
+
+**Works today (no changes needed for CircleOS Next):**
+- All 36 server-side APIs monitored via middleware
+- Blazor WebView apps on CircleOS Next → same APIs → errors captured server-side
+- BigBruh `/wolverine` dashboard accessible from CircleOS browser
+- 4-tier classification: Tier 1 (auto-heal + auto-close), Tier 2 (auto-heal + review), Tier 3 (dev approval), Tier 4 (release approval)
+- GitHub Issues auto-created with tier labels, deduplication, auto-close on heal
+
+**Future: Client-side integration for CircleOS Next:**
+1. **Client error reporting** — on-device errors (JS exceptions, network failures, Aether mesh errors) don't reach server middleware. Need client → WolverineAPI `/api/errors` POST path. The endpoint already exists.
+2. **Mesh-aware error queueing** — offline devices queue errors locally, sync to WolverineAPI when connectivity returns. Same store-and-forward pattern as Aether DTN.
+3. **On-device healing (Butler)** — Tier 1 healing locally: retry network calls, refresh cache, clear stale state. Only escalate Tier 3/4 to server. Butler AI can tell users: "We noticed an issue. It's been fixed."
+4. **OS crash telemetry** — CircleOS `CrashReporter` (OTA Phase 9) feeds into Wolverine as a new error source → GitHub Issues for OS-level bugs.
+5. **TypeScript ErrorClassifier** — for native ArkTS apps. Or POST raw errors to WolverineAPI and let it classify server-side (simpler, recommended for v1).
+
+**Implementation:** `docs/CIRCLEOS_NEXT_TOOLSET.md` (OS tools), `thegeeknetwork/docs/WOLVERINE_HEALING_PIPELINE.md` (full pipeline spec)
+
 ### Build blocker
 Cannot build on MacInCloud (72GB free, need 100GB+). Need dedicated build server: Hetzner AX102 (~€130/mo, 12-core Ryzen, 64GB RAM, 2x1TB NVMe) or equivalent.
 
