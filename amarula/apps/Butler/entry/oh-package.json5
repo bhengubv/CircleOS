@@ -1,0 +1,11 @@
+{
+  "name": "entry",
+  "version": "1.0.0",
+  "description": "Butler entry module",
+  "main": "",
+  "author": "Circle",
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "@circle/design": "file:../../../packages/circle-design"
+  }
+}

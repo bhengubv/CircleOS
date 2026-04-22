@@ -1,0 +1,7 @@
+{
+  "string": [
+    { "name": "module_desc", "value": "Butler entry module" },
+    { "name": "ability_desc", "value": "Butler main ability" },
+    { "name": "perm_mic_reason", "value": "Voice input for on-device AI assistant" }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "product_name": "amarula",
+  "product_company": "circle",
+  "product_device": "rk3568",
+  "product_build_path": "vendor/circle/amarula",
+  "type": "standard",
+  "ohos_version": "OpenHarmony 6.1",
+  "device_company": "hihope",
+  "board": "hh_scdayu200",
+  "kernel_type": "linux",
+  "kernel_version": "5.10",
+  "inherit": ["productdefine/common/inherit/rich.json", "productdefine/common/inherit/chipset_common.json"],
+  "subsystems": [
+    { "subsystem": "security", "components": [] },
+    { "subsystem": "communication", "components": [] },
+    { "subsystem": "applications", "components": [] },
+    { "subsystem": "ai", "components": [] }
+  ]
+}

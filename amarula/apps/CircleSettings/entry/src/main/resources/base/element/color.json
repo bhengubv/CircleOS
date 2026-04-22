@@ -1,0 +1,11 @@
+{
+  "color": [
+    { "name": "start_window_background", "value": "#FFFFFBF7" },
+    { "name": "circle_deep", "value": "#FF1A1F36" },
+    { "name": "circle_warm", "value": "#FFF5F0EB" },
+    { "name": "circle_gold", "value": "#FFD4A574" },
+    { "name": "sage", "value": "#FF7D9B8A" },
+    { "name": "terracotta", "value": "#FFC17B5D" },
+    { "name": "blocked_red", "value": "#FFC45C5C" }
+  ]
+}

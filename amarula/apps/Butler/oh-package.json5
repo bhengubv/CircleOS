@@ -1,0 +1,13 @@
+{
+  "name": "butler",
+  "version": "0.0.1",
+  "description": "Butler — on-device voice-first AI assistant",
+  "author": "Circle",
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "@circle/design": "file:./packages/circle-design"
+  },
+  "devDependencies": {
+    "@ohos/hypium": "^1.0.11"
+  }
+}

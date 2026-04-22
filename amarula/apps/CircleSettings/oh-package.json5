@@ -1,0 +1,11 @@
+{
+  "name": "circlesettings",
+  "version": "0.0.1",
+  "description": "Circle Settings — Amarula",
+  "author": "Circle",
+  "license": "GPL-3.0-or-later",
+  "dependencies": {},
+  "devDependencies": {
+    "@ohos/hypium": "^1.0.11"
+  }
+}
