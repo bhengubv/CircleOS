@@ -1,0 +1,18 @@
+{
+  "install_list": [
+    { "app_dir": "system", "bundle_name": "com.circle.settings", "hap_path": "/system/app/com.circle.settings/CircleSettings.hap", "allowed_acls": ["ohos.permission.MANAGE_SETTINGS"] },
+    { "app_dir": "system", "bundle_name": "com.circle.launcher", "hap_path": "/system/app/com.circle.launcher/CircleLauncher.hap", "allowed_acls": [] },
+    { "app_dir": "system", "bundle_name": "com.circle.systemui", "hap_path": "/system/app/com.circle.systemui/CircleSystemUI.hap", "allowed_acls": [] },
+    { "app_dir": "system", "bundle_name": "com.circle.butler", "hap_path": "/system/app/com.circle.butler/Butler.hap", "allowed_acls": [] },
+    { "app_dir": "system", "bundle_name": "com.circle.messages", "hap_path": "/system/app/com.circle.messages/CircleMessages.hap", "allowed_acls": ["ohos.permission.USE_BLUETOOTH", "ohos.permission.GET_WIFI_INFO"] },
+    { "app_dir": "system", "bundle_name": "com.circle.dialer", "hap_path": "/system/app/com.circle.dialer/CircleDialer.hap", "allowed_acls": [] },
+    { "app_dir": "system", "bundle_name": "com.circle.contacts", "hap_path": "/system/app/com.circle.contacts/CircleContacts.hap", "allowed_acls": [] },
+    { "app_dir": "system", "bundle_name": "com.circle.camera", "hap_path": "/system/app/com.circle.camera/CircleCamera.hap", "allowed_acls": ["ohos.permission.CAMERA"] },
+    { "app_dir": "system", "bundle_name": "com.circle.gallery", "hap_path": "/system/app/com.circle.gallery/CircleGallery.hap", "allowed_acls": [] },
+    { "app_dir": "system", "bundle_name": "com.circle.files", "hap_path": "/system/app/com.circle.files/CircleFiles.hap", "allowed_acls": [] },
+    { "app_dir": "system", "bundle_name": "com.circle.keyboard", "hap_path": "/system/app/com.circle.keyboard/CircleKeyboard.hap", "allowed_acls": [] },
+    { "app_dir": "system", "bundle_name": "com.circle.sleptonstore", "hap_path": "/system/app/com.circle.sleptonstore/SleptOnStore.hap", "allowed_acls": [] },
+    { "app_dir": "system", "bundle_name": "com.circle.ussd", "hap_path": "/system/app/com.circle.ussd/CircleUssd.hap", "allowed_acls": [] },
+    { "app_dir": "system", "bundle_name": "com.circle.loadshedding", "hap_path": "/system/app/com.circle.loadshedding/LoadShedding.hap", "allowed_acls": [] }
+  ]
+}
