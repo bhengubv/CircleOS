@@ -1,0 +1,416 @@
+# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+import("//build/test.gni")
+import("../../../../../bluetooth_part.gni")
+import("../../../../../castplus_cast_engine_part.gni")
+import("../../../../../config.gni")
+import("../../../../../efficiency_manager_part.gni")
+
+module_output_path = "multimedia_av_session/session"
+
+###############################################################################
+config("module_private_config") {
+  visibility = [ ":*" ]
+
+  include_dirs = [
+    "../../include/",
+    "../../../../../../interfaces/inner_api/native/session/include/",
+    "../../../../../services/session/server/",
+    "../../../../../services/session/adapter",
+  ]
+}
+
+common_deps = [
+  "../../../../../services/session:avsession_item_static",
+  "../../../../../services/session:avsession_service_static",
+  "../../../../../utils:avsession_utils",
+  "../../../../common:avsession_common",
+  "../../../session:avsession_client_static",
+  "//third_party/googletest:gtest_main",
+]
+
+common_external_deps = [
+  "ability_base:want",
+  "ability_runtime:wantagent_innerkits",
+  "access_token:libaccesstoken_sdk",
+  "access_token:libnativetoken_shared",
+  "access_token:libtokensetproc_shared",
+  "audio_framework:audio_client",
+  "audio_framework:audio_foundation",
+  "background_task_mgr:bgtaskmgr_innerkits",
+  "c_utils:utils",
+  "device_manager:devicemanagersdk",
+  "dsoftbus:softbus_client",
+  "hilog:libhilog",
+  "image_framework:image_native",
+  "input:libmmi-client",
+  "ipc:ipc_single",
+  "jsoncpp:jsoncpp",
+  "samgr:samgr_proxy",
+]
+
+ohos_unittest("AVSessionManagerTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avsession_manager_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+}
+
+ohos_unittest("MediaInfoHolderTest") {
+  module_out_path = module_output_path
+
+  sources = [ "media_info_holder_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+}
+
+ohos_unittest("AVQueueInfoTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avqueue_info_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+}
+
+ohos_unittest("AVControllerCallbackClientTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avcontroller_callback_client_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+
+  external_deps += [ "ability_base:base" ]
+}
+
+ohos_unittest("SessionListenerClientTest") {
+  module_out_path = module_output_path
+
+  sources = [ "session_listener_client_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+
+  external_deps += [ "ability_base:base" ]
+}
+
+ohos_unittest("AVSessionPixelMapAdapterTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avsession_pixel_map_adapter_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+
+  external_deps += [ "ability_base:base" ]
+}
+
+ohos_unittest("AVSessionManagerImplTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avsession_manager_impl_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+
+  external_deps += [ "ability_base:base" ]
+}
+
+ohos_unittest("AVSessionControllerTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avsession_controller_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+
+  external_deps += [ "ability_base:base" ]
+}
+
+ohos_unittest("AVPlaybackStateTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avplayback_state_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+}
+
+ohos_unittest("AVSessionTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avsession_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+
+  external_deps += [ "ability_base:base" ]
+}
+
+ohos_unittest("AVMetaDataTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avmeta_data_test.cpp" ]
+
+  cflags_cc = [ "-fno-access-control" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+}
+
+ohos_unittest("AVCallMetaDataTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avcallmeta_data_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+}
+
+ohos_unittest("AVCallStateTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avcall_state_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+}
+
+ohos_unittest("AVSessionPermissionTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avsession_permission_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+}
+
+ohos_unittest("AVSessionRemoteTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avsession_remote_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  if (castplus_cast_engine_enable) {
+    cflags = [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
+  }
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+}
+
+ohos_unittest("AVMediaDescriptionTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avmedia_description_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = common_deps
+
+  external_deps = common_external_deps
+}
+
+ohos_unittest("AVDumperTest") {
+  module_out_path = module_output_path
+
+  sources = [ "avsession_dumper_test.cpp" ]
+
+  configs = [ ":module_private_config" ]
+
+  deps = common_deps
+
+  visibility = [ ":*" ]
+
+  include_dirs = [
+    "../../include/",
+    "../../../../../../interfaces/inner_api/native/session/include/",
+    "../../../../../services/session/adapter",
+    "../../../../../services/session/server/",
+    "../../../../../services/session/server/remote",
+  ]
+
+  external_deps = common_external_deps
+  cflags = []
+
+  if (bluetooth_part_enable) {
+    cflags = [ "-DBLUETOOTH_ENABLE" ]
+    external_deps += [ "bluetooth:btframework" ]
+  }
+
+  if (castplus_cast_engine_enable) {
+    cflags += [ "-DCASTPLUS_CAST_ENGINE_ENABLE" ]
+    deps += [
+      "../../../../../frameworks/native/session:avsession_cast_client",
+      "../../../../../services/session:avsession_cast_item_static",
+      "../../../../../services/session:avsession_router_static",
+    ]
+    external_deps += [
+      "cast_engine:cast_engine_client",
+      "window_manager:libdm_lite",
+    ]
+  }
+
+  if (efficiency_manager_enable_in_avsession) {
+    cflags += [ "-DEFFICIENCY_MANAGER_ENABLE" ]
+  }
+
+  if (multimedia_av_session_enable_trace_control) {
+    cflags += [ "-DENBABLE_AVSESSION_TRACE_CONTROL" ]
+    external_deps += [ "hitrace:hitrace_meter" ]
+  }
+
+  if (multimedia_av_session_enable_sysevent_control) {
+    cflags += [ "-DENABLE_AVSESSION_SYSEVENT_CONTROL" ]
+    external_deps += [ "hisysevent:libhisysevent" ]
+  }
+}
+
+if (castplus_cast_engine_enable) {
+  common_deps_without_third_party = [
+    "../../../../../services/session:avsession_item_static",
+    "../../../../../services/session:avsession_service_static",
+    "../../../../../utils:avsession_utils",
+    "../../../../common:avsession_common",
+    "../../../session:avsession_client_static",
+  ]
+
+  ohos_unittest("AVCastControllerTest") {
+    module_out_path = module_output_path
+
+    sources = [ "avcast_controller_test.cpp" ]
+
+    cflags = [
+      "-DCASTPLUS_CAST_ENGINE_ENABLE",
+      "-fno-access-control",
+    ]
+
+    deps = common_deps_without_third_party
+
+    deps += [
+      "../../../../../services/session:avsession_cast_item_static",
+      "../../../../../services/session:avsession_router_static",
+    ]
+
+    visibility = [ ":*" ]
+
+    include_dirs = [
+      "../../include/",
+      "../../../../../services/session/adapter",
+      "../../../../../services/session/ipc/server",
+      "../../../../../services/session/server/",
+      "../../../../../services/session/server/remote",
+    ]
+
+    external_deps = common_external_deps
+
+    external_deps += [
+      "ability_base:want",
+      "ability_runtime:app_manager",
+      "ability_runtime:wantagent_innerkits",
+      "access_token:libaccesstoken_sdk",
+      "access_token:libtokenid_sdk",
+      "audio_framework:audio_client",
+      "bundle_framework:appexecfwk_base",
+      "bundle_framework:appexecfwk_core",
+      "c_utils:utils",
+      "cast_engine:cast_engine_client",
+      "data_object:distributeddataobject_impl",
+      "device_manager:devicemanagersdk",
+      "googletest:gtest_main",
+      "hilog:libhilog",
+      "input:libmmi-client",
+      "ipc:ipc_single",
+      "safwk:system_ability_fwk",
+      "samgr:samgr_proxy",
+    ]
+  }
+}
+
+###############################################################################
+group("av_session_unittest") {
+  testonly = true
+
+  deps = [
+    ":AVCallMetaDataTest",
+    ":AVCallStateTest",
+    ":AVControllerCallbackClientTest",
+    ":AVDumperTest",
+    ":AVMediaDescriptionTest",
+    ":AVMetaDataTest",
+    ":AVPlaybackStateTest",
+    ":AVQueueInfoTest",
+    ":AVSessionControllerTest",
+    ":AVSessionManagerImplTest",
+    ":AVSessionManagerTest",
+    ":AVSessionPermissionTest",
+    ":AVSessionPixelMapAdapterTest",
+    ":AVSessionRemoteTest",
+    ":AVSessionTest",
+    ":MediaInfoHolderTest",
+    ":SessionListenerClientTest",
+  ]
+
+  if (castplus_cast_engine_enable) {
+    deps += [ ":AVCastControllerTest" ]
+  }
+}
+###############################################################################

@@ -1,0 +1,5 @@
+# Pre-sync snapshot — captures upstream state for diff/audit, not source-controlled
+_ohos_patches_take_snapshot/
+
+# Runtime state from build scripts, regenerated each run
+build/_loki_state.json

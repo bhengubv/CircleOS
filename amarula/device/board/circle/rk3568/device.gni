@@ -1,0 +1,9 @@
+# Amarula product uses the HiHope rk3568 board.
+# Import the canonical hihope device.gni (which declares all build args),
+# then redirect board_camera_path to the actual hihope camera implementation.
+
+import("//device/board/hihope/rk3568/device.gni")
+
+# board_camera_path would otherwise resolve to device/board/circle/rk3568/camera
+# which doesn't exist. Point it at the real hihope camera code.
+board_camera_path = "//device/board/hihope/rk3568/camera/vdi_impl/v4l2"
