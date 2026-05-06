@@ -1,0 +1,8 @@
+{
+  "parts": {
+    "product_amarula": {
+      "module_list": []
+    }
+  },
+  "subsystem": "product_amarula"
+}
