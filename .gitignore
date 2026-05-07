@@ -3,6 +3,9 @@
 # Build outputs
 out/
 build/
+# But DO track these intentional build/ subtrees:
+!amarula/build/
+!amarula/_ohos_patches/build/
 *.apk
 *.aab
 *.dex
