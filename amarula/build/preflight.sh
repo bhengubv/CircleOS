@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # CircleOS Amarula build preflight.
-# Validates everything we learned the hard way over 50+ hours of failed attempts.
+# Validates everything we learned the hard way over 70+ hours of failed attempts.
 #
 # Usage:
 #   bash preflight.sh         — read-only checks, exit 1 on first FAIL
@@ -10,6 +10,15 @@
 #   0   all checks passed
 #   1   at least one FAIL (build will not succeed)
 #   2   preflight script bug
+#
+# Lessons encoded here (newest first):
+#   ulimit -n 1024  → "Cannot initialize work tree" on 100+ repos (fix: 65536)
+#   duplicate repo sync processes → corrupted checkout state
+#   ~/.askpass.sh missing → sudo over SSH fails silently
+#   ccache 4.9.x prints "50.0 GB" not "50G" — regex must handle decimals + spaces
+#   repo only in ~/.local/bin → invisible to nohup / non-interactive shells
+#   gitee/gitcode unreachable from SA → FAIL if no insteadOf redirect configured
+#   vm.max_map_count 65530 → ThinLTO linker deadlock (llvm #48833)
 
 set -uo pipefail
 
@@ -49,14 +58,23 @@ check_url "openharmony manifest"  https://github.com/openharmony/manifest
 check_url "huawei prebuilts CDN"  https://repo.huaweicloud.com/openharmony/compiler/
 check_url "npm registry"          https://registry.npmjs.org
 
-# Probe gitee/gitcode — informational
+# Probe gitee/gitcode — many networks (especially outside China) block these
+# FAIL if unreachable AND no insteadOf redirect — repo sync will fail on 100+ projects
 GITEE_OK=$(curl -sI -o /dev/null -w "%{http_code}" --connect-timeout 5 https://gitee.com 2>/dev/null || echo 000)
 if [ "$GITEE_OK" = "200" ] || [ "$GITEE_OK" = "301" ] || [ "$GITEE_OK" = "302" ]; then
   pass "gitee.com reachable (manifest works as-is)"
 else
-  warn "gitee.com unreachable — need git insteadOf redirect to github"
-  fix "git config --global url.\"https://github.com/openharmony/\".insteadOf \"https://gitee.com/openharmony/\""
-  fix "git config --global --add url.\"https://github.com/openharmony/\".insteadOf \"https://gitcode.com/openharmony/\""
+  GITEE_REDIRECT=$(git config --global --get-all url."https://github.com/openharmony/".insteadOf 2>/dev/null | grep -cE "gitee|gitcode" || echo 0)
+  if [ "$GITEE_REDIRECT" -ge 2 ]; then
+    pass "gitee/gitcode unreachable — insteadOf → github redirects configured (both)"
+  elif [ "$GITEE_REDIRECT" -eq 1 ]; then
+    warn "gitee/gitcode unreachable — only 1 of 2 insteadOf redirects configured"
+    fix "git config --global --add url.\"https://github.com/openharmony/\".insteadOf \"https://gitcode.com/openharmony/\""
+  else
+    fail "gitee/gitcode unreachable AND no insteadOf redirects — repo sync will fail on 100+ projects"
+    fix "git config --global url.\"https://github.com/openharmony/\".insteadOf \"https://gitee.com/openharmony/\""
+    fix "git config --global --add url.\"https://github.com/openharmony/\".insteadOf \"https://gitcode.com/openharmony/\""
+  fi
 fi
 
 echo
@@ -101,6 +119,26 @@ OVERCOMMIT=$(sysctl -n vm.overcommit_memory)
 if [ "$OVERCOMMIT" = "1" ]; then pass "vm.overcommit_memory: 1 (heuristic off)"
 else warn "vm.overcommit_memory: $OVERCOMMIT (1 recommended)"; fi
 
+# ulimit -n — CRITICAL: default 1024 causes "Cannot initialize work tree" on 100+ repos
+# repo sync opens a file descriptor per project; with 449 projects it needs >1024
+NOFILE=$(ulimit -n 2>/dev/null || echo 0)
+if [ "$NOFILE" -ge 65536 ]; then
+  pass "ulimit -n (open files): $NOFILE"
+else
+  fail "ulimit -n (open files): $NOFILE (need ≥ 65536 — default 1024 breaks repo checkout)"
+  fix "ulimit -n 65536  # apply now (this shell only)"
+  fix "echo -e '$(whoami) soft nofile 65536\n$(whoami) hard nofile 65536' | sudo tee -a /etc/security/limits.conf  # persist across sessions"
+fi
+
+# Verify limits.conf has persistent nofile setting
+WHOAMI=$(whoami)
+if grep -q "${WHOAMI}.*nofile" /etc/security/limits.conf 2>/dev/null; then
+  pass "limits.conf: persistent nofile entry for $WHOAMI"
+else
+  warn "limits.conf: no persistent nofile entry — ulimit resets on reconnect"
+  fix "echo -e '$WHOAMI soft nofile 65536\n$WHOAMI hard nofile 65536' | sudo tee -a /etc/security/limits.conf"
+fi
+
 echo
 
 # ---------- 4. Build tools ----------
@@ -128,15 +166,19 @@ check_cmd wget
 check_cmd unzip
 check_cmd rsync
 
-# repo tool — special: usually in ~/.local/bin
-if command -v repo >/dev/null 2>&1; then
-  pass "repo: $(repo --version 2>/dev/null | head -1 || echo installed)"
+# repo tool — must be in a PATH that works for ALL shells (interactive, nohup, cron)
+# ~/.local/bin is NOT in PATH for non-interactive shells unless symlinked to /usr/local/bin
+if [ -x /usr/local/bin/repo ]; then
+  pass "repo: $(repo --version 2>/dev/null | head -1 || echo installed) [/usr/local/bin — universal PATH]"
+elif command -v repo >/dev/null 2>&1; then
+  warn "repo in PATH but not at /usr/local/bin — nohup/cron builds will fail"
+  fix "sudo ln -sf \$(which repo) /usr/local/bin/repo"
 elif [ -x "$HOME/.local/bin/repo" ]; then
-  warn "repo found at ~/.local/bin/repo but not in PATH"
-  fix "echo 'export PATH=\"\$HOME/.local/bin:\$PATH\"' >> ~/.bashrc"
+  fail "repo at ~/.local/bin/repo but not in universal PATH — nohup sync will fail"
+  fix "sudo ln -sf \$HOME/.local/bin/repo /usr/local/bin/repo"
 else
   fail "repo: not installed"
-  fix "mkdir -p ~/.local/bin && curl -sSL https://storage.googleapis.com/git-repo-downloads/repo > ~/.local/bin/repo && chmod +x ~/.local/bin/repo"
+  fix "mkdir -p ~/.local/bin && curl -sSL https://storage.googleapis.com/git-repo-downloads/repo > ~/.local/bin/repo && chmod +x ~/.local/bin/repo && sudo ln -sf \$HOME/.local/bin/repo /usr/local/bin/repo"
 fi
 
 echo
@@ -144,13 +186,18 @@ echo
 # ---------- 5. Build configuration ----------
 echo "--- 5. Build configuration ---"
 
-CCACHE_MAX=$(ccache --get-config max_size 2>/dev/null | head -1 || echo "")
-if echo "$CCACHE_MAX" | grep -qE "[0-9]+G"; then
-  CCACHE_GB=$(echo "$CCACHE_MAX" | grep -oE "[0-9]+" | head -1)
-  if [ "$CCACHE_GB" -ge 30 ]; then pass "ccache max_size: $CCACHE_MAX"
-  else warn "ccache max_size: $CCACHE_MAX (50G recommended)"; fi
+# ccache 4.9.x prints "50.0 GB" via --show-config; older versions print "50.0G" via --get-config
+# Use --show-config as canonical source and handle both formats
+CCACHE_MAX=$(ccache --show-config 2>/dev/null | grep -E "^\s*max_size\s*=" | grep -oE "[0-9]+(\.[0-9]+)?\s*[GMT]i?B?" | head -1)
+if [ -z "$CCACHE_MAX" ]; then
+  CCACHE_MAX=$(ccache --get-config max_size 2>/dev/null | head -1 || echo "")
+fi
+if [ -n "$CCACHE_MAX" ]; then
+  CCACHE_GB=$(echo "$CCACHE_MAX" | grep -oE "^[0-9]+" | head -1)
+  if [ "${CCACHE_GB:-0}" -ge 30 ]; then pass "ccache max_size: $CCACHE_MAX"
+  else warn "ccache max_size: $CCACHE_MAX (50G recommended for OH build)"; fi
 else
-  warn "ccache max_size not set (default 5G)"
+  warn "ccache max_size not detectable (default may be 5G)"
   fix "ccache -M 50G"
 fi
 
@@ -174,6 +221,23 @@ if git config --global --get-all safe.directory | grep -q '\*'; then
 else
   warn "git safe.directory not set to '*' (repo forall may fail)"
   fix "git config --global --add safe.directory '*'"
+fi
+
+# git lowSpeedLimit/lowSpeedTime — prevents premature timeout on slow fetches
+LOWSPEED=$(git config --global http.lowSpeedLimit 2>/dev/null || echo 0)
+if [ "$LOWSPEED" -ge 1000 ]; then pass "git http.lowSpeedLimit: $LOWSPEED"
+else
+  warn "git http.lowSpeedLimit not set (repo sync may time out on slow connections)"
+  fix "git config --global http.lowSpeedLimit 1000 && git config --global http.lowSpeedTime 600"
+fi
+
+# sudo askpass helper — required for non-interactive sudo over SSH
+# Without this, sudo prompts for a terminal and silently fails in scripts
+if [ -x "$HOME/.askpass.sh" ]; then
+  pass "~/.askpass.sh: exists and executable"
+else
+  fail "~/.askpass.sh: missing — sudo in build scripts will fail over SSH"
+  fix "printf '#!/bin/bash\necho YOUR_SUDO_PASSWORD_HERE\n' > ~/.askpass.sh && chmod 700 ~/.askpass.sh"
 fi
 
 echo
@@ -209,6 +273,31 @@ if [ -d "$OHOS_DIR/.repo" ]; then
   PROJECT_COUNT=$(find "$OHOS_DIR/.repo/projects" -name '*.git' -type d 2>/dev/null | wc -l)
   if [ "$PROJECT_COUNT" -ge 400 ]; then pass "OHOS tree: $PROJECT_COUNT projects (synced)"
   else warn "OHOS tree: $PROJECT_COUNT projects (incomplete — sync may have failed)"; fi
+
+  # Check for duplicate/stale repo sync processes — multiple syncs corrupt checkout state
+  SYNC_PROCS=$(pgrep -fc "repo/main.py" 2>/dev/null || ps aux | grep "repo/main.py" | grep -vc grep || echo 0)
+  if [ "$SYNC_PROCS" -gt 1 ]; then
+    fail "repo sync: $SYNC_PROCS processes running simultaneously — kill all before building"
+    fix "pkill -f 'repo/main.py'"
+  elif [ "$SYNC_PROCS" -eq 1 ]; then
+    warn "repo sync: 1 process still running — wait for it to finish before building"
+  else
+    pass "repo sync: no stale processes"
+  fi
+
+  # Work tree health — detect repos where dir exists but .git link is missing
+  # This happens when ulimit -n is too low during checkout (fix: raise to 65536)
+  MISSING_GIT=$(find "$OHOS_DIR" -maxdepth 3 -name ".git" -prune -o \
+    -mindepth 2 -maxdepth 3 -type d -print 2>/dev/null | \
+    while read d; do [ ! -e "$d/.git" ] && echo "$d"; done | wc -l 2>/dev/null || echo 0)
+  if [ "${MISSING_GIT:-0}" -gt 50 ]; then
+    fail "Work tree: ~$MISSING_GIT dirs missing .git link (ulimit -n was too low during checkout — re-sync with ulimit 65536)"
+    fix "ulimit -n 65536 && cd $OHOS_DIR && /usr/local/bin/repo sync -c -j4 --no-clone-bundle --retry-fetches=5 --force-sync"
+  elif [ "${MISSING_GIT:-0}" -gt 0 ]; then
+    warn "Work tree: ~$MISSING_GIT dirs may be missing .git links — consider re-sync"
+  else
+    pass "Work tree: .git links present in sampled dirs"
+  fi
 else
   warn "OHOS tree not yet at $OHOS_DIR — run repo sync first"
 fi
