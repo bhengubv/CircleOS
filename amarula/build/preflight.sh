@@ -12,6 +12,7 @@
 #   2   preflight script bug
 #
 # Lessons encoded here (newest first):
+#   DNS resolution failure mid-sync → /etc/resolv.conf lost nameservers (fix: 8.8.8.8)
 #   ulimit -n 1024  → "Cannot initialize work tree" on 100+ repos (fix: 65536)
 #   duplicate repo sync processes → corrupted checkout state
 #   ~/.askpass.sh missing → sudo over SSH fails silently
@@ -39,6 +40,23 @@ echo
 
 # ---------- 1. Network ----------
 echo "--- 1. Network reachability ---"
+
+# DNS resolution — check first; everything else fails if DNS is broken.
+# On WSL2 and some VPS hosts /etc/resolv.conf loses its nameservers silently.
+# Fix: hard-code Google DNS (8.8.8.8 / 8.8.4.4) in /etc/resolv.conf.
+DNS_OK=0
+for host in github.com google.com; do
+  if getent hosts "$host" >/dev/null 2>&1 || nslookup "$host" >/dev/null 2>&1; then
+    DNS_OK=1
+    break
+  fi
+done
+if [ "$DNS_OK" -eq 1 ]; then
+  pass "DNS resolution: working"
+else
+  fail "DNS resolution: broken — cannot resolve hostnames (repo sync will hang retrying forever)"
+  fix "echo -e 'nameserver 8.8.8.8\nnameserver 8.8.4.4' | sudo tee /etc/resolv.conf"
+fi
 
 check_url() {
   local label="$1" url="$2"
