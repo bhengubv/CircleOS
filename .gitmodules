@@ -1,0 +1,6 @@
+[submodule "amarula/foundation/aether"]
+	path = amarula/foundation/aether
+	url = https://github.com/bhengubv/aether-protocol.git
+[submodule "amarula/foundation/bhenguai"]
+	path = amarula/foundation/bhenguai
+	url = https://github.com/bhengubv/BhenguAI.git
