@@ -11,7 +11,7 @@ ENV TZ=Etc/UTC
 RUN apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates curl wget unzip zip rsync git gnupg \
         build-essential bc bison flex \
-        python3 python3-distutils python3-pip \
+        python3 python3-setuptools python3-pip \
         libc6-dev libncurses-dev libssl-dev libgl1 libxml2-utils \
         openjdk-21-jdk-headless \
         ccache fontconfig \
