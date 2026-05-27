@@ -5,7 +5,9 @@
 #   AOSP_DIR       checkout dir (default: $HOME/aosp)
 #   LUNCH_TARGET   AOSP lunch combo (default: aosp_arm64-trunk_staging-userdebug)
 
-set -euo pipefail
+# Note: AOSP's build/envsetup.sh references unset vars ($TOP etc.) and breaks
+# under `set -u`. We keep -e and pipefail but drop nounset.
+set -eo pipefail
 
 AOSP_DIR="${AOSP_DIR:-${HOME}/aosp}"
 LUNCH_TARGET="${LUNCH_TARGET:-aosp_arm64-trunk_staging-userdebug}"
