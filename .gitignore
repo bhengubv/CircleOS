@@ -80,3 +80,16 @@ temp/
 
 # Claude local settings (machine-specific)
 .claude/settings.local.json
+
+# AOSP build outputs (specifically)
+*.img
+.repo/
+
+# Rust (native components built from scripts/)
+target/
+Cargo.lock
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/

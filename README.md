@@ -24,33 +24,40 @@ Complete specification for Circle OS — a privacy-first, age-adaptive mobile op
 ## Document Structure
 
 ```
-circle-os-spec/
-├── CLAUDE.md              # Autonomous dev guide (load first)
-├── README.md              # This file
-└── chapters/
-    ├── 01_vision.txt          # Philosophy & principles
-    ├── 02_non_goals.txt       # What we refuse to do
-    ├── 03_security.txt        # GrapheneOS-level security model
-    ├── 04_privacy.txt         # Permission model & dashboard
-    ├── 05_hardware.txt        # Target devices & specs
-    ├── 06_boot.txt            # Dual boot architecture
-    ├── 07_system.txt          # System architecture
-    ├── 08_android_compat.txt  # Android app compatibility
-    ├── 09_data_continuity.txt # Data migration & sharing
-    ├── 10_updates_recovery.txt # OTA & recovery
-    ├── 11_onboarding.txt      # Setup wizard & first boot
-    ├── 12_age_modes.txt       # Standard, Kid, Elder modes
-    ├── 13_accessibility.txt   # Full accessibility support
-    ├── 14_offline_lowres.txt  # Offline & low-resource
-    ├── 15_circle_store.txt    # App ecosystem
-    ├── 16_developer_guide.txt # Building & contributing
-    ├── 17_device_porting.txt  # Community device ports
-    ├── 18_mesh_networking.txt # P2P mesh communication
-    ├── 19_firewall_lobby.txt  # Firewall & traffic quarantine
-    ├── 20_malware_jail.txt    # Malware containment & intel
-    ├── 21_threat_telemetry.txt # Community defense system
-    ├── 22_data_acuity_platform.txt # Backend threat intel
-    └── 23_brand_design_system.txt  # Brand & UI design
+CircleOS/
+├── CLAUDE.md, MASTER_PLAN.md, Claude_Session_State.md   Planning docs
+├── README.md, CONTRIBUTING.md                            Repo overview
+├── .devcontainer/    Reproducible AOSP build container (Clang, Rust, NDK, SDK)
+├── scripts/          setup.sh, sync.sh, build.sh — GSI build pipeline
+├── fixtures/         Static binaries for offline validation
+├── docs/             Architecture notes (INSTALL_PATHS.md, etc.)
+├── aether-protocol/  Submodule — universal network layer
+├── amarula/          (legacy) OpenHarmony v1 — superseded by GSI direction
+├── sites/            Static site assets
+└── chapters/         23 spec chapters
+    ├── 01_vision.txt              Philosophy & principles
+    ├── 02_non_goals.txt           What we refuse to do
+    ├── 03_security.txt            GrapheneOS-level security model
+    ├── 04_privacy.txt             Permission model & dashboard
+    ├── 05_hardware.txt            Target devices & specs
+    ├── 06_boot.txt                Dual boot architecture
+    ├── 07_system.txt              System architecture
+    ├── 08_android_compat.txt      Android app compatibility
+    ├── 09_data_continuity.txt     Data migration & sharing
+    ├── 10_updates_recovery.txt    OTA & recovery
+    ├── 11_onboarding.txt          Setup wizard & first boot
+    ├── 12_age_modes.txt           Standard, Kid, Elder modes
+    ├── 13_accessibility.txt       Full accessibility support
+    ├── 14_offline_lowres.txt      Offline & low-resource
+    ├── 15_circle_store.txt        App ecosystem
+    ├── 16_developer_guide.txt     Building & contributing
+    ├── 17_device_porting.txt      Community device ports
+    ├── 18_mesh_networking.txt     P2P mesh communication
+    ├── 19_firewall_lobby.txt      Firewall & traffic quarantine
+    ├── 20_malware_jail.txt        Malware containment & intel
+    ├── 21_threat_telemetry.txt    Community defense system
+    ├── 22_data_acuity_platform.txt Backend threat intel
+    └── 23_brand_design_system.txt  Brand & UI design
 ```
 
 ---
@@ -148,20 +155,30 @@ Smooth is fast.
 
 ## Getting Started (Development)
 
+The build scaffold lives at the repo root: a containerised AOSP toolchain
+in `.devcontainer/` and a three-step pipeline in `scripts/`. The current
+target is a stock-AOSP **Generic System Image** that installs via
+**Android Dynamic System Updates (DSU)** — brick-proof, no bootloader
+unlock required. Circle-specific lunch combos and the custom manifest
+will layer on top once the foundation is green.
+
 ```bash
-# Clone manifest
-repo init -u https://github.com/circleos/manifest.git -b main
-repo sync -j8
+# On a Linux build host (Ubuntu 22.04 or 24.04, ~300 GB free recommended)
+git clone https://github.com/bhengubv/CircleOS.git
+cd CircleOS
 
-# Build for P30 Lite
-source build/envsetup.sh
-lunch circle_mar-userdebug
-make -j$(nproc)
-
-# Build GSI (generic)
-lunch circle_arm64-userdebug
-make -j$(nproc)
+sudo ./scripts/setup.sh    # Install AOSP build deps (~5 min)
+./scripts/sync.sh          # repo init + sync AOSP source (~150 GB, multi-hour)
+./scripts/build.sh         # Build the GSI: out/target/product/generic_arm64/system.img
 ```
+
+Output: `out/target/product/generic_arm64/system.img` — push to a device
+via Settings → Developer options → DSU Loader → Local image. If anything
+goes wrong, the next normal reboot returns to stock Android. No risk.
+
+See [`docs/INSTALL_PATHS.md`](docs/INSTALL_PATHS.md) for the dual-path
+architecture: DSU as the default user install, P30 Lite + PotatoNV +
+partition hijack as the hard-mode reference target.
 
 ---
 

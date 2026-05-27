@@ -1,0 +1,17 @@
+{
+  "name": "circleos-gsi",
+  "build": { "dockerfile": "Dockerfile" },
+  "workspaceFolder": "/workspace",
+  "remoteUser": "root",
+  "runArgs": ["--memory=24g", "--cpus=4"],
+  "postCreateCommand": "git config --global --add safe.directory /workspace && echo 'devcontainer ready. Next: ./scripts/sync.sh (will fetch ~150 GB of AOSP source)'",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rust-lang.rust-analyzer",
+        "ms-vscode.cpptools",
+        "redhat.vscode-yaml"
+      ]
+    }
+  }
+}
