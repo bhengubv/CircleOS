@@ -17,6 +17,12 @@ if [ ! -d "$AOSP_DIR/.repo" ]; then
     exit 1
 fi
 
+# ccache: dramatically speeds up incremental rebuilds (typically 5–10x).
+# AOSP only uses host ccache when these env vars are set explicitly.
+# scripts/setup.sh already configures ~/.ccache to 50 GB with compression.
+export USE_CCACHE="${USE_CCACHE:-1}"
+export CCACHE_EXEC="${CCACHE_EXEC:-/usr/bin/ccache}"
+
 cd "$AOSP_DIR"
 
 # shellcheck disable=SC1091
