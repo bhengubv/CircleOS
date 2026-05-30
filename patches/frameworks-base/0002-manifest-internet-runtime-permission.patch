@@ -1,0 +1,46 @@
+From: Circle OS Build <ops@circleos.org>
+Date: 2026-05-30
+Subject: [PATCH 0002/000X] manifest: promote INTERNET from normal to dangerous
+
+INTERNET ships as android:protectionLevel="normal|instant" in upstream
+AOSP, which auto-grants it at install. Circle OS treats outbound network
+access as a user decision, not an app's claim, so we demote it to a
+runtime-grantable permission by changing the protectionLevel to
+"dangerous|instant".
+
+Consequence: at first install, third-party packages will not have
+INTERNET granted. The CirclePrivacyService binder (see vendor/circle/
+privacy/) is the source of truth for whether the user has granted it.
+Until the fake-response provider lands, denied apps will see
+SecurityException on socket open --- this is intentional for the
+intermediate state.
+
+The 'instant' flag is preserved so instant apps continue to behave
+as upstream specifies.
+
+Targets: AOSP 15, tag android-15.0.0_r20.
+Touches: core/res/AndroidManifest.xml
+
+diff --git a/core/res/AndroidManifest.xml b/core/res/AndroidManifest.xml
+index 6b8056c77fda..73ce4d882fa6 100644
+--- a/core/res/AndroidManifest.xml
++++ b/core/res/AndroidManifest.xml
+@@ -2176,12 +2176,16 @@
+     <eat-comment />
+ 
+     <!-- Allows applications to open network sockets.
+-         <p>Protection level: normal
++         <p>Protection level: dangerous
++         <p>Circle OS modification: promoted from normal to dangerous so that
++            outbound network access is granted per-app at runtime via the
++            Circle Privacy Framework (CirclePrivacyService). The user is the
++            authority on which apps may reach the network.
+     -->
+     <permission android:name="android.permission.INTERNET"
+         android:description="@string/permdesc_createNetworkSockets"
+         android:label="@string/permlab_createNetworkSockets"
+-        android:protectionLevel="normal|instant" />
++        android:protectionLevel="dangerous|instant" />
+ 
+     <!-- Allows applications to access information about networks.
+          <p>Protection level: normal

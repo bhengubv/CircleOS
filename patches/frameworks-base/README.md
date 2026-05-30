@@ -18,4 +18,4 @@ upstream tree untouched outside of `git am`.
 | # | File | Step | What it does |
 |---|---|---|---|
 | 0001 | `0001-systemserver-start-circle-privacy.patch` | 1 | Registers `CirclePrivacyService` with `SystemServer`. |
-| 0002 | `0002-internet-runtime-permission.patch` | 1 | Demotes `android.permission.INTERNET` from a normal install-time permission to a `dangerous` runtime permission and routes the grant decision through `CirclePrivacyService`. |
+| 0002 | `0002-manifest-internet-runtime-permission.patch` | 1 | Promotes `android.permission.INTERNET` from `normal\|instant` to `dangerous\|instant` so outbound network access becomes a per-app runtime grant. The grant decision will be routed through `CirclePrivacyService` in a follow-up patch. |

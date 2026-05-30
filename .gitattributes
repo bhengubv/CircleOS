@@ -1,0 +1,22 @@
+# Force LF on files that must not have CRLF for correctness:
+#   - .patch files: `git apply` rejects CRLF in the diff text on a tree
+#     that uses LF, which our AOSP checkout does.
+#   - .sh / .bash files: shebang + line endings break on Linux build hosts.
+#   - .aidl / .bp / .te / .mk files: Soong, sepolicy, and make are pickier
+#     about whitespace than they need to be; LF is the safe baseline.
+#   - .java: AOSP convention is LF.
+
+*.patch    text eol=lf
+*.sh       text eol=lf
+*.bash     text eol=lf
+*.aidl     text eol=lf
+*.bp       text eol=lf
+*.te       text eol=lf
+*.mk       text eol=lf
+*.java     text eol=lf
+*.c        text eol=lf
+*.h        text eol=lf
+Makefile   text eol=lf
+
+# service_contexts has no extension; pin it explicitly.
+service_contexts text eol=lf
