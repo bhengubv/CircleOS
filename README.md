@@ -28,12 +28,17 @@ CircleOS/
 ├── CLAUDE.md, MASTER_PLAN.md, Claude_Session_State.md   Planning docs
 ├── README.md, CONTRIBUTING.md                            Repo overview
 ├── .devcontainer/    Reproducible AOSP build container (Clang, Rust, NDK, SDK)
-├── scripts/          setup.sh, sync.sh, build.sh — GSI build pipeline
+├── manifests/        circle.xml — repo overlay manifest pulling every
+│                     CircleOS_* GitHub repo into its AOSP tree path
+├── scripts/          setup.sh, sync.sh, build.sh — GSI baseline pipeline
+├── huawei/p30-lite/  Hard-mode reference: boot-selector ramdisk +
+│                     device audit + injection notes
 ├── fixtures/         Static binaries for offline validation
-├── docs/             Architecture notes (INSTALL_PATHS.md, etc.)
-├── aether-protocol/  Submodule — universal network layer
-├── amarula/          (legacy) OpenHarmony v1 — superseded by GSI direction
-├── sites/            Static site assets
+├── docs/             Architecture notes — including REPO_MANIFEST.md,
+│                     INSTALL_PATHS.md, CIRCLEOS_NEXT_TOOLSET.md
+├── aether-protocol/  Submodule — universal mesh network layer (OSS)
+├── amarula/          (legacy) OpenHarmony v1 — superseded
+├── sites/            Static site assets (public website)
 └── chapters/         23 spec chapters
     ├── 01_vision.txt              Philosophy & principles
     ├── 02_non_goals.txt           What we refuse to do
@@ -155,30 +160,52 @@ Smooth is fast.
 
 ## Getting Started (Development)
 
-The build scaffold lives at the repo root: a containerised AOSP toolchain
-in `.devcontainer/` and a three-step pipeline in `scripts/`. The current
-target is a stock-AOSP **Generic System Image** that installs via
-**Android Dynamic System Updates (DSU)** — brick-proof, no bootloader
-unlock required. Circle-specific lunch combos and the custom manifest
-will layer on top once the foundation is green.
+There are two valid build paths from this repo:
+
+### 1. Circle OS proper (the system image)
+
+Pulls every `CircleOS_*` GitHub repo (`vendor/circle`, `frameworks/base`
+fork, `build/circle`, the three device trees, `CircleSettings`,
+`CircleLauncher`) into a synced AOSP 15 tree via the repo manifest at
+[`manifests/circle.xml`](manifests/circle.xml) and produces
+`out/target/product/circle_arm64/system.img`.
+
+Full instructions: [`docs/REPO_MANIFEST.md`](docs/REPO_MANIFEST.md).
 
 ```bash
-# On a Linux build host (Ubuntu 22.04 or 24.04, ~300 GB free recommended)
-git clone https://github.com/bhengubv/CircleOS.git
-cd CircleOS
-
-sudo ./scripts/setup.sh    # Install AOSP build deps (~5 min)
-./scripts/sync.sh          # repo init + sync AOSP source (~150 GB, multi-hour)
-./scripts/build.sh         # Build the GSI: out/target/product/generic_arm64/system.img
+# Path A — fresh tree (~250 GB free, 16+ GB RAM)
+mkdir ~/circle-tree && cd ~/circle-tree
+repo init -u https://android.googlesource.com/platform/manifest -b android-15.0.0_r20 \
+          --partial-clone --clone-filter=blob:limit=10M
+mkdir -p .repo/local_manifests
+curl -o .repo/local_manifests/circle.xml \
+     https://raw.githubusercontent.com/bhengubv/CircleOS/main/manifests/circle.xml
+repo sync -c -j"$(nproc)" --fail-fast --no-clone-bundle
+source build/envsetup.sh
+lunch circle_arm64-userdebug
+m -j"$(nproc)" systemimage
 ```
 
-Output: `out/target/product/generic_arm64/system.img` — push to a device
-via Settings → Developer options → DSU Loader → Local image. If anything
-goes wrong, the next normal reboot returns to stock Android. No risk.
+### 2. Stock-AOSP GSI baseline (sanity check / DSU fall-back)
+
+A vanilla AOSP 15 GSI that ignores `vendor/circle` entirely — useful as
+a known-good baseline when you want to confirm the build host itself is
+healthy before pointing at the Circle overlays. Three-step pipeline:
+
+```bash
+sudo ./scripts/setup.sh    # AOSP build deps (~5 min)
+./scripts/sync.sh          # repo init + sync upstream AOSP only
+./scripts/build.sh         # Build → out/target/product/generic_arm64/system.img
+```
+
+Output is a Treble-compliant GSI installable via Settings → Developer
+options → DSU Loader → Local image. If anything goes wrong, the next
+normal reboot returns to stock Android — no risk, brick-proof.
 
 See [`docs/INSTALL_PATHS.md`](docs/INSTALL_PATHS.md) for the dual-path
-architecture: DSU as the default user install, P30 Lite + PotatoNV +
-partition hijack as the hard-mode reference target.
+user-install architecture: DSU as the default user install, P30 Lite +
+PotatoNV + partition hijack ([`huawei/p30-lite/`](huawei/p30-lite/)) as
+the hard-mode reference target.
 
 ---
 

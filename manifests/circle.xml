@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Circle OS overlay manifest.
+
+  This file is the *Circle-side* overlay only. It does not stand alone —
+  it is dropped on top of the upstream AOSP manifest (currently pinned
+  to android-15.0.0_r20) so that `repo sync` pulls the canonical
+  CircleOS_* GitHub repos into their AOSP tree locations.
+
+  Usage:
+    cd <aosp-tree-root>
+    mkdir -p .repo/local_manifests
+    cp <this file> .repo/local_manifests/circle.xml
+    repo sync -c -j$(nproc)
+
+  See ../docs/REPO_MANIFEST.md for the full workflow, including a
+  fresh-tree bootstrap recipe and the lunch + build invocation.
+
+  Pinning policy
+  ==============
+  All Circle projects track `main` at v0. Once the alpha image cuts,
+  this file gets revised to pin each project to a specific SHA per
+  release tag, so the release is bit-reproducible. Until then `main`
+  is fine — the projects don't see external traffic yet.
+-->
+<manifest>
+
+    <!-- ============ remote ==================================================== -->
+
+    <remote name="bhengubv"
+            fetch="https://github.com/bhengubv/"
+            review="https://github.com/bhengubv/" />
+
+    <!-- ============ replace upstream frameworks/base ========================= -->
+    <!-- Circle has its own frameworks/base fork. The remove-project drops the
+         upstream entry from the AOSP base manifest so repo doesn't try to
+         sync both. -->
+
+    <remove-project name="platform/frameworks/base" />
+    <project path="frameworks/base"
+             name="CircleOS_platform_frameworks_base"
+             remote="bhengubv"
+             revision="main" />
+
+    <!-- ============ vendor/circle overlay ==================================== -->
+    <!-- The home of every Circle-specific app, library, sepolicy fragment,
+         resource overlay, and product makefile. This is the heart of what
+         turns AOSP into CircleOS. -->
+
+    <project path="vendor/circle"
+             name="CircleOS_vendor_circle"
+             remote="bhengubv"
+             revision="main" />
+
+    <!-- ============ Circle build config ====================================== -->
+    <!-- Lunch targets, circle_arm64 / circle_base product mks, vendorsetup. -->
+
+    <project path="build/circle"
+             name="CircleOS_build"
+             remote="bhengubv"
+             revision="main" />
+
+    <!-- ============ Circle device trees ===================================== -->
+    <!-- One project per supported device. `common` holds shared BoardConfig
+         + emulator product. The per-device trees inherit from common. -->
+
+    <project path="device/circle/common"
+             name="CircleOS_device_circle_common"
+             remote="bhengubv"
+             revision="main" />
+
+    <project path="device/circle/redmi_note12"
+             name="CircleOS_device_circle_redmi_note12"
+             remote="bhengubv"
+             revision="main" />
+
+    <project path="device/circle/pixel6"
+             name="CircleOS_device_circle_pixel6"
+             remote="bhengubv"
+             revision="main" />
+
+    <!-- ============ Circle system apps ====================================== -->
+    <!-- Apps that live under packages/apps/. CircleSettings here is the
+         standalone "settings shell" app (com.circleos.settings package);
+         the vendor/circle/apps/ tree has a different, parallel set of
+         app projects keyed under za.co.circleos.<area>. Both ship; the
+         layered design is intentional per the spec. -->
+
+    <project path="packages/apps/CircleSettings"
+             name="CircleOS_packages_apps_CircleSettings"
+             remote="bhengubv"
+             revision="main" />
+
+    <project path="packages/apps/CircleLauncher"
+             name="CircleOS_packages_apps_CircleLauncher"
+             remote="bhengubv"
+             revision="main" />
+
+</manifest>
