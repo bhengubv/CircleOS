@@ -31,16 +31,28 @@
             fetch="https://github.com/bhengubv/"
             review="https://github.com/bhengubv/" />
 
-    <!-- ============ replace upstream frameworks/base ========================= -->
-    <!-- Circle has its own frameworks/base fork. The remove-project drops the
-         upstream entry from the AOSP base manifest so repo doesn't try to
-         sync both. -->
+    <!-- ============ NOTE on frameworks/base ================================== -->
+    <!-- CircleOS_platform_frameworks_base exists as a fork but its `main`
+         tracks Android 15 QPR1 (25Q1-release) while the rest of this tree
+         pins to android-15.0.0_r20. The Soong Go API drifted between those
+         versions and Soong bootstrap fails with:
+              frameworks/base/api/api.go: javaInfo.AndroidLibraryDependencyInfo undefined
+         A grep confirms the fork carries no circleos paths today — it is
+         stale upstream code, not Circle-specific modifications.
 
-    <remove-project name="platform/frameworks/base" />
-    <project path="frameworks/base"
-             name="CircleOS_platform_frameworks_base"
-             remote="bhengubv"
-             revision="main" />
+         Decision: build against upstream frameworks/base (no override here).
+         Once Circle framework services land (CirclePrivacyManagerService,
+         CircleMeshService, CircleUpdateService, …), they ship as patch
+         series under bhengubv/CircleOS/patches/frameworks-base/ applied
+         post-sync, NOT as a wholesale fork. That keeps the AOSP rebase
+         story tractable.
+
+         To re-enable the fork once it has been rebased onto r20:
+            <remove-project name="platform/frameworks/base" />
+            <project path="frameworks/base"
+                     name="CircleOS_platform_frameworks_base"
+                     remote="bhengubv"
+                     revision="<sha pinned to r20>" /> -->
 
     <!-- ============ vendor/circle overlay ==================================== -->
     <!-- The home of every Circle-specific app, library, sepolicy fragment,
