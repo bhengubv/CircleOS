@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Privileged-app permissions granted to Circle-signed packages.
+  Drops into /system/etc/permissions/ at build time.
+
+  The MANAGE_PRIVACY permission is itself defined by the Circle Privacy
+  Framework and is enforced by CirclePrivacyService at the binder layer.
+  Granting it here lets the SystemUI / Settings shell drive the framework
+  without going through a runtime prompt.
+-->
+<permissions>
+    <privapp-permissions package="com.circleos.settings">
+        <permission name="za.co.circleos.permission.MANAGE_PRIVACY"/>
+    </privapp-permissions>
+    <privapp-permissions package="com.circleos.systemui">
+        <permission name="za.co.circleos.permission.MANAGE_PRIVACY"/>
+    </privapp-permissions>
+</permissions>

@@ -1,0 +1,43 @@
+// Circle Privacy Framework — Step 1.
+//
+// Lives inside system_server. Exposes an AIDL binder (ICirclePrivacyManager)
+// that other parts of the OS (and Circle apps) use to ask:
+//
+//   - is this package currently allowed network access?
+//   - should we hand it a synthetic / fake response instead of denying?
+//
+// The framework patches that promote INTERNET to a runtime permission and
+// wire the fake-response provider into NetworkPolicyManagerService live in
+// ../patches/frameworks-base/. This module is just the home of the
+// Circle-owned code.
+
+package {
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
+// AIDL surface exposed to Circle apps and to internal callers.
+filegroup {
+    name: "services.circleprivacy-aidl-sources",
+    srcs: ["aidl/**/*.aidl"],
+    path: "aidl",
+}
+
+// The service is a SystemService that registers under name "circle_privacy".
+// It is built into services.jar so the boot-time SystemServer can start it.
+java_library {
+    name: "services.circleprivacy",
+    srcs: [
+        "java/**/*.java",
+        ":services.circleprivacy-aidl-sources",
+    ],
+    libs: [
+        "framework",
+        "services.core",
+    ],
+    static_libs: [],
+    installable: true,
+    sdk_version: "core_platform",
+    aidl: {
+        local_include_dirs: ["aidl"],
+    },
+}

@@ -1,0 +1,26 @@
+# SELinux policy for CirclePrivacyService.
+#
+# The service runs *inside* system_server, so it inherits the
+# `system_server` domain and we don't need a new type for the process
+# itself. We do however need to:
+#
+#   1. Label its persistence file (/data/system/circle_privacy.xml) so
+#      only system_server can read/write it. The existing
+#      `system_data_file` label is appropriate — this file is created via
+#      AtomicFile under /data/system/ which is already labelled.
+#
+#   2. Allow callers (via binder) to find the published service under
+#      the name "circle_privacy". This requires a service_contexts entry
+#      and a service type. We use `app_api_service` semantics: the
+#      service is callable by ordinary apps that hold MANAGE_PRIVACY,
+#      so we model it like other app-facing system services.
+
+# A type for the service-manager registration. apps and system_server
+# need to find it; only system_server adds to it.
+type circle_privacy_service, service_manager_type;
+
+# Allow system_server to register the service.
+allow system_server circle_privacy_service:service_manager add;
+
+# Allow ordinary apps to look it up.
+allow appdomain circle_privacy_service:service_manager find;

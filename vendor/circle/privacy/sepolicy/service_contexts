@@ -1,0 +1,4 @@
+# Map the service-manager name to the SELinux type.
+# This file is concatenated into the system service_contexts at build time
+# by the vendor/circle build glue.
+circle_privacy                            u:object_r:circle_privacy_service:s0

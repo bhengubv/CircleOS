@@ -1,0 +1,42 @@
+From: Circle OS Build <ops@circleos.org>
+Date: 2026-05-30
+Subject: [PATCH 0001/000X] systemserver: start CirclePrivacyService
+
+Wires CirclePrivacyService (vendor/circle/privacy/) into the SystemServer
+boot sequence so the "circle_privacy" binder is published before any
+third-party app starts.
+
+We start it via the String overload of SystemServiceManager.startService
+so SystemServer does not need an import of a Circle-owned class -- the
+service is reflectively loaded from services.circleprivacy at boot.
+
+If the start throws, we reportWtf and continue: a broken Circle service
+must never prevent SystemServer from finishing its boot.
+
+Targets: AOSP 15, tag android-15.0.0_r20.
+Touches: services/java/com/android/server/SystemServer.java
+
+diff --git a/services/java/com/android/server/SystemServer.java b/services/java/com/android/server/SystemServer.java
+index 92dbf63b3cf7..139261cc882b 100644
+--- a/services/java/com/android/server/SystemServer.java
++++ b/services/java/com/android/server/SystemServer.java
+@@ -1484,6 +1484,19 @@ public final class SystemServer implements Dumpable {
+         t.traceBegin("startOtherServices");
+         mSystemServiceManager.updateOtherServicesStartIndex();
+ 
++        // ---- Circle OS services -----------------------------------------
++        // Start the Privacy Framework as early as possible so its binder
++        // is available before any third-party app boots. See
++        // vendor/circle/privacy/.
++        try {
++            t.traceBegin("StartCirclePrivacyService");
++            mSystemServiceManager.startService(
++                    "com.circleos.privacy.CirclePrivacyService");
++            t.traceEnd();
++        } catch (Throwable e) {
++            reportWtf("starting CirclePrivacyService", e);
++        }
++
+         final Context context = mSystemContext;
+         DynamicSystemService dynamicSystem = null;
+         IStorageManager storageManager = null;
