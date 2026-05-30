@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Circle OS brand palette.
+
+  The three brand-defining colours from the spec live at the top. Below
+  them are the semantic colours apps and the system shell reference by
+  name (never raw hex). New colours must be added here, not invented
+  per-app, so a theme overlay can recolour the whole OS by overriding
+  this one file.
+
+  Modes (Daily / Work / Sport / Night / Secure / etc.) override the
+  accent colour via per-mode overlay packages; this file is the
+  "no mode active" baseline.
+-->
+<resources>
+
+    <!-- ===== brand ====================================================== -->
+
+    <color name="circle_deep">#FF1A1F36</color>     <!-- primary chrome -->
+    <color name="circle_warm">#FFF5F0EB</color>     <!-- light surfaces -->
+    <color name="circle_gold">#FFD4A574</color>     <!-- highlights, badges -->
+
+    <!-- ===== neutrals =================================================== -->
+
+    <color name="circle_ink">#FF0E0F1B</color>       <!-- absolute text on light -->
+    <color name="circle_smoke">#FF3A3F52</color>     <!-- secondary text on light -->
+    <color name="circle_fog">#FFD9D6CF</color>       <!-- dividers, disabled bg -->
+    <color name="circle_paper">#FFFFFFFF</color>     <!-- card / surface 1 -->
+
+    <!-- ===== semantic =================================================== -->
+
+    <color name="circle_ok">#FF4CAF50</color>        <!-- success, healthy mesh -->
+    <color name="circle_warn">#FFFFB300</color>      <!-- caution, low signal -->
+    <color name="circle_alert">#FFD32F2F</color>     <!-- failure, blocked traffic -->
+    <color name="circle_focus">#FF2196F3</color>     <!-- selection, focus ring -->
+
+    <!-- ===== mode accents ================================================
+         Mirror modes.json — keep in sync if the catalogue updates. -->
+
+    <color name="mode_daily_accent">#FF1A1F36</color>
+    <color name="mode_work_accent">#FF2C3E50</color>
+    <color name="mode_secure_accent">#FFD32F2F</color>
+    <color name="mode_sport_accent">#FF4CAF50</color>
+    <color name="mode_night_accent">#FF1E3A5F</color>
+    <color name="mode_student_accent">#FFFF9800</color>
+    <color name="mode_creator_accent">#FF9C27B0</color>
+    <color name="mode_calm_accent">#FF5DADE2</color>
+    <color name="mode_emergency_accent">#FFB71C1C</color>
+    <color name="mode_voyager_accent">#FF00ACC1</color>
+    <color name="mode_driver_accent">#FF424242</color>
+    <color name="mode_maker_accent">#FF607D8B</color>
+    <color name="mode_kid_daily_accent">#FFD4A574</color>
+    <color name="mode_elder_daily_accent">#FFF5F0EB</color>
+
+</resources>

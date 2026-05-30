@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Dark-theme overrides.
+
+  Same names as values/colors.xml, with the surfaces inverted: paper
+  becomes near-black, ink becomes near-white. Brand colours are kept
+  identical so the user recognises the device across themes.
+-->
+<resources>
+
+    <color name="circle_deep">#FFE5DCC8</color>     <!-- chrome surface (warm light) -->
+    <color name="circle_warm">#FF1A1F36</color>     <!-- light surfaces -> dark base -->
+    <color name="circle_gold">#FFD4A574</color>     <!-- highlights unchanged -->
+
+    <color name="circle_ink">#FFF5F0EB</color>       <!-- text on dark -->
+    <color name="circle_smoke">#FFB8BCC8</color>     <!-- secondary text on dark -->
+    <color name="circle_fog">#FF2A2F42</color>       <!-- dividers, disabled bg -->
+    <color name="circle_paper">#FF13182C</color>     <!-- card surface in dark -->
+
+    <color name="circle_ok">#FF66BB6A</color>
+    <color name="circle_warn">#FFFFCA28</color>
+    <color name="circle_alert">#FFEF5350</color>
+    <color name="circle_focus">#FF42A5F5</color>
+
+</resources>
