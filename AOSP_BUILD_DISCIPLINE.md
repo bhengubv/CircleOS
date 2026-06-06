@@ -32,6 +32,7 @@ Established 2026-06-05 after wasting ~3 hours of wall-clock on 4 full-systemimag
 ### Known AOSP gotchas to check upfront
 
 - **Prebuilt APKs with `presigned: true` and target SDK ≥ 30 require `preprocessed: true`.** Soong's signature-v2 protection refuses to re-process them otherwise. Update fetch scripts to emit both.
+- **Prebuilt APKs with compressed JNI libs (lib/*.so as DEFLATE not STORE) ALSO need `skip_preprocessed_apk_checks: true`.** AOSP's preprocessed validation refuses compressed natives. zipalign -p 4 only re-aligns, doesn't change compression. Repacking would break the v2 signature. The flag is the documented escape hatch — runtime cost is the lib gets extracted to `/data/data/<pkg>/lib/` instead of mmap'd from the APK. Negligible for app-sized prebuilts like microG GmsCore. Discovered 2026-06-06 on the GmsCore integration.
 - **vendor/.mk files only fire if `include`d.** Adding a new .mk doesn't auto-link. Check `grep -r "include.*your.mk" vendor/circle build/circle device/circle`.
 - **PRODUCT_PROPERTY_OVERRIDES vs PRODUCT_SYSTEM_PROPERTIES:** properties labeled by SELinux as `system_property_type` (via `system_public_prop`) only land in `/system/build.prop` if declared via `PRODUCT_SYSTEM_PROPERTIES`, not the legacy `PRODUCT_PROPERTY_OVERRIDES`. (Round 21 fix — took the team 4 rounds.)
 - **Adding new files to `services/core/java/**`** triggers Soong glob regen — that's an extra ~5-15 min vs an unchanged build. Batch multiple Java additions into one build cycle.
