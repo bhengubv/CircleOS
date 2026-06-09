@@ -1,0 +1,68 @@
+From: Thamsanqa Bengu <tbengu@thegeek.co.za>
+Date: Fri, 5 Jun 2026 05:30:00 +0000
+Subject: [PATCH] Register CirclePrivacyManagerService in SystemServer
+
+Wires the Circle Privacy Engine into system_server. The service file
+itself lives at services/core/java/com/circleos/server/privacy/
+CirclePrivacyManagerService.java (added via the overlays/ pass).
+
+Adds the AIDL stub library android.circleos-java to services.core's
+static_libs so the binder Stub classes resolve at compile time.
+
+Placement: registered immediately after PermissionPolicyService —
+the analogous Android permission-side service — so Circle's privacy
+gate is available by the time PHASE_THIRD_PARTY_APPS_CAN_START fires
+and the first user APK launches.
+
+Apply with:
+    cd ~/aosp/frameworks/base
+    git am < ~/CircleOS/patches/frameworks-base/series/0001-register-circle-privacy-service.patch
+---
+ services/core/Android.bp                                   | 1 +
+ services/java/com/android/server/SystemServer.java          | 5 +++++
+ 2 files changed, 6 insertions(+)
+
+diff --git a/services/core/Android.bp b/services/core/Android.bp
+--- a/services/core/Android.bp
++++ b/services/core/Android.bp
+@@ -XX,X +XX,X @@ java_library_static {
+         "stats_flags_lib",
+         "core_os_flags_lib",
+         "connectivity_flags_lib",
++        "android.circleos-java",
+     ],
+
+diff --git a/services/java/com/android/server/SystemServer.java b/services/java/com/android/server/SystemServer.java
+--- a/services/java/com/android/server/SystemServer.java
++++ b/services/java/com/android/server/SystemServer.java
+@@ -1550,6 +1550,11 @@
+         t.traceBegin("StartPermissionPolicyService");
+         mSystemServiceManager.startService(PermissionPolicyService.class);
+         t.traceEnd();
++
++        // CircleOS: privacy engine + per-app policy. Must be up before
++        // PHASE_THIRD_PARTY_APPS_CAN_START so user-installed APKs hit
++        // a deny-by-default network gate from the first launch.
++        t.traceBegin("StartCirclePrivacyManagerService");
++        mSystemServiceManager.startService(
++                com.circleos.server.privacy.CirclePrivacyManagerService.class);
++        t.traceEnd();
+
+         CrashRecoveryAdaptor.initializeCrashrecoveryModuleService(mSystemServiceManager);
+
+--
+2.43.0
+
+# NOTE: line numbers in the diff headers (@@ -XX,X +XX,X @@) are
+# placeholders. Regenerate with `git format-patch` after applying via:
+#
+#   cd ~/aosp/frameworks/base
+#   git checkout -b circle-privacy-scaffold
+#   # ... apply by hand ...
+#   git commit -am "Register CirclePrivacyManagerService"
+#   git format-patch -1 HEAD
+#   mv 0001-*.patch ~/CircleOS/patches/frameworks-base/series/
+#   git checkout main && git branch -D circle-privacy-scaffold
+#
+# The PLACEMENT (line 1550 after PermissionPolicyService) is correct
+# per inspection of frameworks/base @ d57664e9bc46.
