@@ -1,6 +1,6 @@
 Autonomous: On
 
-# Circle OS & Data Acuity — Claude Code Instructions
+# Circle OS — Claude Code Instructions
 
 > **"Slow is smooth. Smooth is fast. Fast leads to delivery."**
 
@@ -85,22 +85,6 @@ MESH:         WiFi Direct, Bluetooth LE
 DATABASE:     SQLite (SQLCipher for encrypted)
 ```
 
-### Data Acuity (Backend)
-
-```
-PLATFORM:     Python 3.11+ / FastAPI
-LANGUAGES:    Python
-DATABASE:     PostgreSQL 16
-CACHE:        Redis 7
-SEARCH:       Elasticsearch 8
-QUEUE:        RabbitMQ / Redis Streams
-STORAGE:      S3-compatible (Minio)
-CONTAINER:    Docker
-HOSTING:      The Geek Network infrastructure
-```
-
----
-
 ## CHAPTER REFERENCE
 
 | Ch | File | Topic | Implementation |
@@ -179,30 +163,6 @@ packages/apps/
         └── communitydefense/
 ```
 
-### Data Acuity (Backend) — Separate Repo
-
-> **Note:** Data Acuity lives in `/Users/admin/Code/Dev/dataacuity/`, NOT in this repo.
-> See `dataacuity/CLAUDE.md` for full details.
-
-```
-dataacuity/
-├── suite/                    # Master orchestration (Traefik, Keycloak)
-├── markets/                  # Financial markets data (OpenBB)
-├── maps/                     # Geospatial platform (PostGIS, OSRM)
-├── api-gateway/              # Unified API gateway
-├── monitoring/               # Prometheus, Grafana, Loki
-├── data-warehouse/           # Analytics PostgreSQL
-├── dbt/                      # Data transformation
-├── superset/                 # BI dashboards
-├── n8n/                      # Workflow automation
-├── twenty/                   # CRM
-├── morph/                    # File converter
-├── ai-brain/                 # Ollama + Open WebUI
-└── portal/                   # Landing page
-```
-
----
-
 ## KEY APIS
 
 ### Circle OS Binder Interfaces
@@ -243,26 +203,6 @@ interface IThreatIntelService {
 }
 ```
 
-### Data Acuity REST API
-
-```
-BASE: https://api.dataacuity.co.za/v1
-
-# Public endpoints (no auth)
-POST /threat/submit           # Circle OS submits threat report
-GET  /threat/feed             # Circle OS fetches threat feed
-POST /canary/register         # Register canary token
-GET  /stats/public            # Public statistics
-
-# Authenticated endpoints (API key)
-GET  /ioc/lookup?type=&value= # Lookup single IOC
-POST /ioc/bulk-lookup         # Bulk IOC lookup
-GET  /campaign/{id}           # Campaign details
-GET  /feed/full               # Full feed (enterprise)
-```
-
----
-
 ## DATABASE SCHEMAS
 
 ### Circle OS (SQLite)
@@ -302,64 +242,6 @@ CREATE TABLE connections (
 -- /data/circle/honeypot/
 -- Fake contacts, messages, photos, etc.
 ```
-
-### Data Acuity (PostgreSQL)
-
-```sql
--- See Chapter 22 for full schema
--- Key tables:
-CREATE TABLE iocs (
-    id UUID PRIMARY KEY,
-    type VARCHAR(20) NOT NULL,           -- ip, domain, hash
-    value TEXT NOT NULL,
-    threat_type VARCHAR(50),             -- c2, malware, phishing
-    severity VARCHAR(20) NOT NULL,       -- low, medium, high, critical
-    confidence INTEGER DEFAULT 50,
-    first_seen TIMESTAMP WITH TIME ZONE,
-    last_seen TIMESTAMP WITH TIME ZONE,
-    reports_count INTEGER DEFAULT 1,
-    campaign_id UUID REFERENCES campaigns(id),
-    source VARCHAR(50)
-);
-
-CREATE TABLE campaigns (
-    id UUID PRIMARY KEY,
-    name VARCHAR(100) NOT NULL UNIQUE,
-    actor_type VARCHAR(50),              -- state, criminal, unknown
-    targets TEXT[],
-    target_regions VARCHAR(2)[],
-    first_seen TIMESTAMP WITH TIME ZONE,
-    last_active TIMESTAMP WITH TIME ZONE
-);
-
-CREATE TABLE threat_reports (
-    id UUID PRIMARY KEY,
-    received_at TIMESTAMP WITH TIME ZONE,
-    country_code VARCHAR(2),
-    threat_type VARCHAR(50),
-    severity VARCHAR(20),
-    report_data JSONB NOT NULL,
-    processed BOOLEAN DEFAULT FALSE
-);
-
-CREATE TABLE canary_tokens (
-    id UUID PRIMARY KEY,
-    type VARCHAR(20) NOT NULL,           -- email, phone, document, dns
-    value TEXT NOT NULL UNIQUE,
-    device_hash VARCHAR(64) NOT NULL,
-    triggered BOOLEAN DEFAULT FALSE
-);
-
-CREATE TABLE canary_triggers (
-    id UUID PRIMARY KEY,
-    canary_id UUID REFERENCES canary_tokens(id),
-    triggered_at TIMESTAMP WITH TIME ZONE,
-    source_ip INET,
-    user_agent TEXT
-);
-```
-
----
 
 ## CRYPTOGRAPHIC STANDARDS
 
@@ -569,35 +451,6 @@ fun String.toSha256(): String =
         .toHexString()
 ```
 
-### Python (Data Acuity)
-
-```python
-# Use FastAPI with Pydantic models
-from pydantic import BaseModel
-
-class ThreatReportDto(BaseModel):
-    schema_version: str
-    report_type: str
-    country: str
-    timestamp: datetime
-    indicators: IndicatorsDto
-
-# Use async endpoints
-@app.post("/threat/submit")
-async def submit_report(report: ThreatReportDto):
-    await validate(report)
-    report_id = await db.insert(report)
-    await queue.enqueue(AnalysisJob(report_id))
-    return {"status": "accepted", "report_id": report_id}
-
-# Use dependency injection
-async def get_db() -> AsyncGenerator[Database, None]:
-    async with database_pool.acquire() as conn:
-        yield conn
-```
-
----
-
 ## TESTING REQUIREMENTS
 
 ### Unit Tests
@@ -707,32 +560,7 @@ CIRCLE_THREAT_FEED_URL=https://api.dataacuity.co.za/v1/threat/feed
 CIRCLE_CANARY_DOMAIN=canary.circelos.org
 ```
 
-### Data Acuity (Runtime)
-
-```bash
-ASPNETCORE_ENVIRONMENT=Production
-ConnectionStrings__Default=Host=db;Database=dataacuity;Username=app;Password=${DB_PASSWORD}
-Redis__Connection=redis:6379
-SDPKT_API_URL=https://api.sdpkt.co.za
-SDPKT_API_KEY=<secret>
-```
-
----
-
 ## DEPLOYMENT
-
-### Data Acuity
-
-```bash
-# Build
-docker build -t dataacuity:latest .
-
-# Deploy (The Geek Network infrastructure)
-docker-compose up -d
-
-# Migrations
-dotnet ef database update
-```
 
 ### Circle OS
 
