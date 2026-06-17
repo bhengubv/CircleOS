@@ -4,9 +4,53 @@
 
 Complete specification for Circle OS — a privacy-first, age-adaptive mobile operating system designed to run on existing devices (dual boot with Android) and Circle native hardware.
 
-**v2.0 adds:** Mesh networking, Traffic Lobby firewall, Malware Jail, Community Defense telemetry, Data Acuity threat intelligence platform, and complete brand/design system.
+**v2.0 adds:** Mesh networking, Traffic Lobby firewall, Malware Jail, Community Defense telemetry and complete brand/design system.
 
 ---
+
+## Repositories
+
+Circle OS is assembled from the repositories below via the `manifests/circle.xml` repo overlay. **This repo is the front door**; the buildable source lives in the `CircleOS_*` projects.
+
+**OS source**
+
+| Repo | What it is |
+|------|------------|
+| [CircleOS_platform_frameworks_base](https://github.com/bhengubv/CircleOS_platform_frameworks_base) | AOSP `frameworks/base` fork — Circle privacy + mesh **system services** (branch `circle-15`) |
+| [CircleOS_vendor_circle](https://github.com/bhengubv/CircleOS_vendor_circle) | Vendor overlay — bundled apps, microG / degoogle, SELinux policy, build config |
+| [CircleOS_build](https://github.com/bhengubv/CircleOS_build) | Build system — lunch targets, product configs |
+| [CircleOS_device_circle_common](https://github.com/bhengubv/CircleOS_device_circle_common) | Base device tree |
+| [CircleOS_device_circle_redmi_note12](https://github.com/bhengubv/CircleOS_device_circle_redmi_note12) | Xiaomi Redmi Note 12 (sky) — minimum supported device |
+| [CircleOS_device_circle_pixel6](https://github.com/bhengubv/CircleOS_device_circle_pixel6) | Google Pixel 6 (oriole) |
+| [CircleOS_packages_apps_CircleSettings](https://github.com/bhengubv/CircleOS_packages_apps_CircleSettings) | Privacy Settings app — dashboard, per-app controls, setup wizard |
+| [CircleOS_packages_apps_CircleLauncher](https://github.com/bhengubv/CircleOS_packages_apps_CircleLauncher) | Home launcher with privacy-status widget |
+
+**Foundation libraries**
+
+| Repo | What it is |
+|------|------------|
+| [aether-protocol](https://github.com/bhengubv/aether-protocol) | Aether mesh networking protocol — device-to-device without internet (MIT) |
+| [aether-media](https://github.com/bhengubv/aether-media) | Offline-first media streaming over the Aether mesh |
+| [CircleAI](https://github.com/bhengubv/CircleAI) | On-device AI platform for the Circle ecosystem |
+
+## Build
+
+Circle OS builds as an Android 15 GSI that runs **alongside** your current OS (dual-boot, no wipe):
+
+```bash
+./scripts/setup.sh   # one-time: repo tool + toolchain
+./scripts/sync.sh    # repo init + sync (pulls the CircleOS_* repos via manifests/circle.xml)
+./scripts/build.sh   # builds the GSI -> out/target/product/generic_arm64/system.img
+```
+
+## Install — dual-boot, no wipe
+
+The output is a GSI you load next to your existing system via Android's Dynamic System Updates:
+
+```bash
+adb push system.img /sdcard/Download/system.img
+# Settings -> System -> Developer options -> DSU Loader -> Local image
+```
 
 ## Quick Start
 
@@ -25,7 +69,7 @@ Complete specification for Circle OS — a privacy-first, age-adaptive mobile op
 
 ```
 CircleOS/
-├── CLAUDE.md, MASTER_PLAN.md, Claude_Session_State.md   Planning docs
+├── CLAUDE.md, MASTER_PLAN.md   Planning docs
 ├── README.md, CONTRIBUTING.md                            Repo overview
 ├── .devcontainer/    Reproducible AOSP build container (Clang, Rust, NDK, SDK)
 ├── manifests/        circle.xml — repo overlay manifest pulling every
