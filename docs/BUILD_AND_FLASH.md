@@ -68,12 +68,16 @@ because `PRODUCT_DEVICE := generic_arm64`, not the product name.
 `bp4a` is mandatory; `trunk_staging` produces an image a released device
 refuses to boot. The tutorial explains why.
 
-### Run check-product. Really.
+### What check-product will stop you doing
 
-On a bare AOSPLite build the product checks rarely find anything, because
-there are no bundled privileged apps to get wrong. **On Circle OS they
-find things regularly**, because there are 22 apps, several overlays and
-a permission allowlist to keep in step.
+`build.sh` runs `check-product` itself on every build, so you cannot
+forget it; running it first, as above, just gets you the answer in
+seconds instead of after `envsetup`.
+
+On a bare AOSPLite build it rarely finds anything, because there are no
+bundled privileged apps to get wrong. **On Circle OS it finds things
+regularly**, because there are 22 apps, several overlays and a permission
+allowlist to keep in step.
 
 Both faults it blocks on have been hit here, and both produce an image
 that builds cleanly and reports success:
