@@ -10,19 +10,33 @@ Complete specification for Circle OS — a privacy-first, age-adaptive mobile op
 
 ## Repositories
 
-Circle OS is assembled from the repositories below via the `manifests/circle.xml` repo overlay. **This repo is the front door**; the buildable source lives in the `CircleOS_*` projects.
+Circle OS has **two core repositories**. This one is the specification —
+what Circle OS is and why. [`aosplite`](https://github.com/bhengubv/aosplite)
+is the base and the pipeline — the AOSP debloat it is built on, and the
+build, check and flash tooling. Neither holds OS source; that lives in the
+`CircleOS_*` projects, assembled into an AOSP tree by `manifests/circle.xml`.
+
+**New here? Read [docs/WHERE_EVERYTHING_LIVES.md](docs/WHERE_EVERYTHING_LIVES.md)** —
+a map of every repository, what is active, and what looks active but is not.
+
+**Core**
+
+| Repo | What it is |
+|------|------------|
+| **CircleOS** (this repo) | The specification, the chapters, the design guides, the repo manifest |
+| [aosplite](https://github.com/bhengubv/aosplite) | Maintained AOSP debloat + the build/flash pipeline and its preflight checks |
 
 **OS source**
 
 | Repo | What it is |
 |------|------------|
-| [CircleOS_platform_frameworks_base](https://github.com/bhengubv/CircleOS_platform_frameworks_base) | AOSP `frameworks/base` fork — Circle privacy + mesh **system services** (branch `circle-15`) |
+| [CircleOS_platform_frameworks_base](https://github.com/bhengubv/CircleOS_platform_frameworks_base) | `frameworks/base` fork — **not currently used.** The tree that builds and boots uses upstream AOSP `frameworks/base`; see [WHERE_EVERYTHING_LIVES.md](docs/WHERE_EVERYTHING_LIVES.md) |
 | [CircleOS_vendor_circle](https://github.com/bhengubv/CircleOS_vendor_circle) | Vendor overlay — bundled apps, microG / degoogle, SELinux policy, build config |
 | [CircleOS_build](https://github.com/bhengubv/CircleOS_build) | Build system — lunch targets, product configs |
 | [CircleOS_device_circle_common](https://github.com/bhengubv/CircleOS_device_circle_common) | Base device tree |
 | [CircleOS_device_circle_redmi_note12](https://github.com/bhengubv/CircleOS_device_circle_redmi_note12) | Xiaomi Redmi Note 12 (sky) — minimum supported device |
 | [CircleOS_device_circle_pixel6](https://github.com/bhengubv/CircleOS_device_circle_pixel6) | Google Pixel 6 (oriole) |
-| [CircleOS_packages_apps_CircleSettings](https://github.com/bhengubv/CircleOS_packages_apps_CircleSettings) | Privacy Settings app — dashboard, per-app controls, setup wizard |
+| [CircleOS_packages_apps_CircleSettings](https://github.com/bhengubv/CircleOS_packages_apps_CircleSettings) | Privacy Settings app — **not synced into the working tree**; `vendor/circle/apps/CircleSettings` is built instead. Reconciling the two is open |
 | [CircleOS_packages_apps_CircleLauncher](https://github.com/bhengubv/CircleOS_packages_apps_CircleLauncher) | Home launcher with privacy-status widget |
 
 **Foundation libraries**
@@ -35,12 +49,27 @@ Circle OS is assembled from the repositories below via the `manifests/circle.xml
 
 ## Build
 
-Circle OS builds as an Android 15 GSI that runs **alongside** your current OS (dual-boot, no wipe):
+Circle OS builds as an **Android 16** GSI that runs **alongside** your current
+OS (dual-boot, no wipe). Verified booting on a Google Pixel 7a (`lynx`) on
+2026-09-14 from `android-16.0.0_r4`:
 
 ```bash
 ./scripts/setup.sh   # one-time: repo tool + toolchain
 ./scripts/sync.sh    # repo init + sync (pulls the CircleOS_* repos via manifests/circle.xml)
 ./scripts/build.sh   # builds the GSI -> out/target/product/generic_arm64/system.img
+```
+
+The lunch target is `circle_arm64-bp4a-userdebug`. The `bp4a` release config
+is not optional: `trunk_staging` produces an image that reports itself as a
+pre-release build and will not boot on a released device.
+
+Check the tree before spending a build, and let the flash pipeline run its
+own preflight — both live in `aosplite`:
+
+```bash
+aosplite/tools/check-product.sh ~/android circle_arm64
+aosplite/tools/flash.sh --img out/target/product/generic_arm64/system.img \
+                        --vbmeta <vbmeta with flags=2> --serial <device>
 ```
 
 ## Install — dual-boot, no wipe

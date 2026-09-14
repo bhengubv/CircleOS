@@ -1,17 +1,21 @@
 # Building Circle OS from canonical sources
 
-This is the end-to-end recipe for assembling an AOSP 15 tree plus every
-`CircleOS_*` repo, in the right places, and getting a system image out
-the other end. It supersedes the from-scratch `vendor/circle/`
-scaffold that briefly lived in this repo on 2026-05-30 — that work has
-been reverted and replaced with the manifest-driven approach documented
-here.
+The end-to-end recipe for assembling an AOSP tree plus every `CircleOS_*`
+repo, in the right places, and getting a system image out the other end.
+
+> **Base is AOSP 16 (`android-16.0.0_r4`), not 15.** This document
+> described a 15 tree until 2026-09-15. The tree that currently builds and
+> boots on a Pixel 7a is 16. Where a command below differs from what you
+> remember, the 16 form is the one that has been run.
+
+For a map of which repositories are active, which are not, and what lives
+where, see [WHERE_EVERYTHING_LIVES.md](WHERE_EVERYTHING_LIVES.md).
 
 ## Inventory — what gets pulled where
 
 | Repo (`github.com/bhengubv/...`)         | AOSP tree path                       |
 |------------------------------------------|--------------------------------------|
-| `CircleOS_platform_frameworks_base`       | `frameworks/base` *(replaces upstream)* |
+| ~~`CircleOS_platform_frameworks_base`~~    | **not used** — upstream AOSP `frameworks/base` is what builds and boots |
 | `CircleOS_vendor_circle`                  | `vendor/circle`                      |
 | `CircleOS_build`                          | `build/circle`                       |
 | `CircleOS_device_circle_common`           | `device/circle/common`               |
@@ -21,7 +25,11 @@ here.
 | `CircleOS_packages_apps_CircleLauncher`   | `packages/apps/CircleLauncher`       |
 
 Manifest source: [`manifests/circle.xml`](../manifests/circle.xml).
-Base AOSP tag: `android-15.0.0_r20`.
+Base AOSP tag: **`android-16.0.0_r4`**.
+
+`CircleOS_packages_apps_CircleSettings` is in the table because it is the
+canonical repo, but the working tree does not sync it — it builds
+`vendor/circle/apps/CircleSettings` instead. Reconciling the two is open.
 
 ## Path A — bootstrap a fresh tree
 
@@ -40,7 +48,7 @@ export PATH=$HOME/bin:$PATH
 # 2. AOSP base
 mkdir -p ~/circle-tree && cd ~/circle-tree
 repo init -u https://android.googlesource.com/platform/manifest \
-          -b android-15.0.0_r20 \
+          -b android-16.0.0_r4 \
           --partial-clone --clone-filter=blob:limit=10M
 
 # 3. Drop the Circle overlay manifest
@@ -58,11 +66,31 @@ ccache -M 50G
 
 # 6. Build
 source build/envsetup.sh
-lunch circle_arm64-userdebug   # or circle_arm64-trunk_staging-userdebug
-m -j"$(nproc)" systemimage      # ~3–6 h cold; ~10–30 min hot via ccache
+lunch circle_arm64-bp4a-userdebug
+m -j"$(nproc)" systemimage      # ~3–6 h cold; ~8–20 min incremental
 ```
 
-The resulting GSI lands in `out/target/product/circle_arm64/system.img`.
+**`bp4a` is not optional.** It is the released release-config. Building
+`trunk_staging` produces an image that declares itself pre-release
+(`ro.build.version.codename=Baklava`, `preview_sdk=1`) and will not boot on
+a released device. Patching those properties in a finished image does not
+help — the libraries underneath are still staging builds.
+
+The resulting GSI lands in
+**`out/target/product/generic_arm64/system.img`** — `generic_arm64`, not
+`circle_arm64`, because the product sets `PRODUCT_DEVICE := generic_arm64`.
+
+Before spending the build, and before flashing what it produced, use the
+checks in [`aosplite`](https://github.com/bhengubv/aosplite):
+
+```bash
+tools/check-product.sh ~/android circle_arm64   # catches boot-loop faults
+tools/flash.sh --img out/target/product/generic_arm64/system.img \
+               --vbmeta <vbmeta with flags=2 in the FILE> --serial <serial>
+```
+
+`flash.sh` always runs flash preflight and writes nothing to the device if
+it reports a blocking problem.
 
 ## Path B — add the Circle overlay to an already-synced AOSP tree
 
@@ -77,19 +105,18 @@ mkdir -p .repo/local_manifests
 curl -o .repo/local_manifests/circle.xml \
      https://raw.githubusercontent.com/bhengubv/CircleOS/main/manifests/circle.xml
 
-# 2. Drop the upstream frameworks/base so the Circle fork can take its place
-rm -rf frameworks/base .repo/projects/frameworks/base.git \
-       .repo/project-objects/platform/frameworks/base.git
-
-# 3. Pull in the Circle projects
+# 2. Pull in the Circle projects.
+#    Do NOT delete upstream frameworks/base. An earlier version of this
+#    document replaced it with CircleOS_platform_frameworks_base; that fork
+#    is not in use, and removing the upstream project breaks the tree.
 repo sync -c -j"$(nproc)" --no-clone-bundle \
-          vendor/circle build/circle frameworks/base \
+          vendor/circle build/circle \
           device/circle/common device/circle/redmi_note12 device/circle/pixel6 \
-          packages/apps/CircleSettings packages/apps/CircleLauncher
+          packages/apps/CircleLauncher
 
-# 4. Build (same as Path A step 6)
+# 3. Build (same as Path A step 6)
 source build/envsetup.sh
-lunch circle_arm64-userdebug
+lunch circle_arm64-bp4a-userdebug
 m -j"$(nproc)" systemimage
 ```
 
@@ -98,9 +125,9 @@ m -j"$(nproc)" systemimage
 After `repo sync` completes, every path in the [Inventory](#inventory--what-gets-pulled-where) table should exist as a populated git checkout:
 
 ```bash
-for p in vendor/circle build/circle frameworks/base \
+for p in vendor/circle build/circle \
          device/circle/{common,redmi_note12,pixel6} \
-         packages/apps/{CircleSettings,CircleLauncher}; do
+         packages/apps/CircleLauncher; do
     if [ -d "$p" ] && [ -n "$(ls -A "$p")" ]; then
         echo "ok   $p"
     else
@@ -109,7 +136,7 @@ for p in vendor/circle build/circle frameworks/base \
 done
 ```
 
-A successful `lunch circle_arm64-userdebug` followed by `m nothing`
+A successful `lunch circle_arm64-bp4a-userdebug` followed by `m nothing`
 proves the Soong analysis phase parses every Android.bp in the tree —
 this is the fastest way to catch a missing module or sepolicy mismatch
 before committing to a full system image build.
