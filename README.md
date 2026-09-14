@@ -24,7 +24,7 @@ a map of every repository, what is active, and what looks active but is not.
 | Repo | What it is |
 |------|------------|
 | **CircleOS** (this repo) | The specification, the chapters, the design guides, the repo manifest |
-| [aosplite](https://github.com/bhengubv/aosplite) | Maintained AOSP debloat + the build/flash pipeline and its preflight checks |
+| [aosplite](https://github.com/bhengubv/aosplite) | Maintained AOSP debloat + the build/flash pipeline and its preflight checks. Its [TUTORIAL.md](https://github.com/bhengubv/aosplite/blob/main/docs/TUTORIAL.md) takes you from clone to booted device |
 
 **OS source**
 

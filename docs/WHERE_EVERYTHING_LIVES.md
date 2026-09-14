@@ -52,6 +52,7 @@ here.
 | Path | What it is |
 |---|---|
 | `manifests/` | five prune tiers — what is removed from AOSP and why |
+| `docs/TUTORIAL.md` | **the end-to-end walk-through** — clone, sync, check, build, flash, confirm the boot, read the log when there is none |
 | `tools/build.sh` | the build wrapper; fixes the environment in a file rather than in someone's shell history |
 | `tools/check-product.sh` | **build preflight** — four faults that a build reports as success and a device reports as a boot loop |
 | `tools/flash-preflight.sh` | **flash preflight** — image and device checks before anything is written |
