@@ -37,6 +37,7 @@ the reasoning behind it.
 | `docs/CircleOS_Skin_Design_Guide.md` | **the design authority for the Metro look** — §1 is the Metro discipline inherited, §2 is what makes it Circle OS rather than Windows Phone |
 | `docs/CircleOS_Theme_Skins_Scout.md` | licence-verified list of what can legally be shipped in a skin |
 | `docs/CircleOS_WP-Inspired_Backlog.md` | 80 Windows Phone ideas, `WP-01`…`WP-80`, stable IDs to cite in commits |
+| `docs/BUILD_AND_FLASH.md` | **how to build and flash Circle OS** — only what differs from a plain GSI; the mechanics live in aosplite's tutorial |
 | `docs/REPO_MANIFEST.md` | how to assemble a tree from the `CircleOS_*` repos |
 | `manifests/circle.xml` | the repo overlay that does it |
 | `amarula/` | a separate OpenHarmony line of work — **not** part of the Android GSI |
