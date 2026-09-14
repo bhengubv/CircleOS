@@ -1,0 +1,17 @@
+{
+    "process": "circleos_telemetry_service",
+    "systemability": [
+        {
+            "name": 65545,
+            "libpath": "libcircleos_telemetry_service.z.so",
+            "run-on-create": true,
+            "auto-restart": true,
+            "distributed": false,
+            "dump-level": 1,
+            "extension": [],
+            "permission": [
+                "ohos.permission.GET_BUNDLE_INFO"
+            ]
+        }
+    ]
+}

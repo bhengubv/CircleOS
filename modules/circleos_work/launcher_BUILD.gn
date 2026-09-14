@@ -1,0 +1,23 @@
+import("//build/ohos.gni")
+
+ohos_executable("circleos_launcher") {
+  sources = [ "main.cpp" ]
+
+  include_dirs = [
+    "//base/startup/init/interfaces/innerkits/include",
+    "//base/startup/init/interfaces/innerkits/include/syspara",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "init:libbegetutil",
+  ]
+
+  install_enable = true
+  install_images = [ "system" ]
+  module_install_dir = "bin"
+
+  part_name = "product_amarula"
+  subsystem_name = "product_amarula"
+}
