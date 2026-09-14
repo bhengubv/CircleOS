@@ -52,6 +52,14 @@ AESTHETIC:    Organised warmth — premium without pretension
 ```
 
 KEY COLORS:
+
+> Two palettes exist and they do not agree. This one is the brand/product
+> palette from chapter 23. The **shipping** OS theme is the skin palette in
+> `docs/CircleOS_Skin_Design_Guide.md` §2.1, locked to `#2196F3` primary
+> with `#2C3E50` and `#FFFFFF` — that is what `CircleMetroOverlay` actually
+> paints on the device. Reconciling the two is an open decision; until it is
+> made, the skin guide governs anything the OS renders.
+
 ```
 Circle Deep:    #1A1F36    (primary dark)
 Circle Warm:    #F5F0EB    (primary light)
@@ -75,15 +83,25 @@ Community:      "47,832 people in your Circle."
 ### Circle OS (Mobile)
 
 ```
-PLATFORM:     Android 14 (AOSP fork)
-LANGUAGES:    Kotlin (preferred), Java, C/C++ (native)
-BUILD:        Gradle, AOSP build system
-UI:           Jetpack Compose
-ARCHITECTURE: MVVM, Clean Architecture
+PLATFORM:     Android 16 GSI (android-16.0.0_r4), built on AOSPLite
+LUNCH:        circle_arm64-bp4a-userdebug     <- bp4a is mandatory
+OUTPUT:       out/target/product/generic_arm64/system.img
+LANGUAGES:    Java (what the tree actually uses), Kotlin, C/C++ (native)
+BUILD:        Soong / AOSP build system. Not Gradle.
+UI:           Android views + XML. Compose is used by ONE app (HomeCinema).
 CRYPTO:       Tink (Google), libsodium
 MESH:         WiFi Direct, Bluetooth LE
 DATABASE:     SQLite (SQLCipher for encrypted)
 ```
+
+> Counted in `vendor/circle/apps` on 2026-09-15: 65 `.java`, 12 `.kt`, and
+> Compose imports in one app. Writing new UI in Compose because this file
+> once said so would be going against the grain of the whole tree.
+
+**This is a GSI, not an AOSP fork.** Circle OS is a product layered on
+upstream AOSP via `vendor/circle`, `build/circle` and `device/circle`. The
+`frameworks/base` fork described further down is **not in use** — see
+`docs/WHERE_EVERYTHING_LIVES.md`.
 
 ## CHAPTER REFERENCE
 
@@ -104,6 +122,20 @@ DATABASE:     SQLite (SQLCipher for encrypted)
 ## DIRECTORY STRUCTURE
 
 ### Circle OS (AOSP)
+
+> **WARNING — the tree below does not exist in any repository.**
+>
+> Checked on 2026-09-15 against the working tree: `com/circleos/server/mesh`,
+> `.../firewall`, `.../malwarejail` and `.../threatintel` contain **0 files**.
+> Of the four AIDL interfaces documented under *Key APIs*, only
+> `ICircleMeshService` is present (at
+> `vendor/circle/aidl/za/co/circleos/mesh/`, not in `frameworks/base`).
+>
+> This code exists on the `.201` build machine and nowhere else. It is not
+> in `CircleOS_platform_frameworks_base`, which is a plain AOSP mirror.
+> Recovering it is an open task. Until then, treat this section as the
+> **intended design**, not as a map of the source — nothing here can be
+> opened, built or called.
 
 ```
 frameworks/base/services/core/java/com/circleos/server/
@@ -257,7 +289,29 @@ DATABASE:           SQLCipher (256-bit AES)
 
 ---
 
-## STATUS AUDIT (2026-03-25)
+## STATUS AUDIT
+
+> **The 2026-03-25 audit below is six months stale and wrong in both
+> directions.** Current state, verified on hardware 2026-09-15:
+>
+> - **The build is confirmed.** `circle_arm64-bp4a-userdebug` builds clean
+>   and boots on a Google Pixel 7a (`lynx`, CP1A.260405.005):
+>   `sys.boot_completed=1`, 335 services, no crash-buffer entries. The
+>   "Build not confirmed" line below is obsolete.
+> - **The build blocker is gone.** It builds in WSL2 on an 8-thread laptop:
+>   ~18 minutes incremental. No Hetzner box was needed.
+> - **Still open:** the system surfaces outside the launcher are stock
+>   Android; the OS boots light while the Metro identity is true-black;
+>   `ro.circle.*` is unreadable to apps so OTA cannot read its update URL;
+>   nothing is deployed at `ota.circleos.co.za`; `com.circleos.server.*`
+>   and `CircleHeyB` are in no repository.
+> - **The OpenHarmony direction below** (`circleos-next`) is a separate
+>   line of work under `amarula/`. The Android GSI is what boots today.
+>
+> Full detail: `docs/WHERE_EVERYTHING_LIVES.md` and
+> `docs/BUILD_AND_FLASH.md`.
+
+## STATUS AUDIT (2026-03-25 — stale, kept for history)
 
 ### What's Complete (all confirmed via session state)
 ```
@@ -557,7 +611,7 @@ public async Task<IActionResult> Submit([FromBody] ThreatReportDto report)
 ```bash
 CIRCLE_BUILD_TYPE=userdebug
 CIRCLE_THREAT_FEED_URL=https://api.dataacuity.co.za/v1/threat/feed
-CIRCLE_CANARY_DOMAIN=canary.circelos.org
+CIRCLE_CANARY_DOMAIN=canary.circleos.co.za   # circleos.com/.org are NOT ours
 ```
 
 ## DEPLOYMENT
@@ -565,14 +619,21 @@ CIRCLE_CANARY_DOMAIN=canary.circelos.org
 ### Circle OS
 
 ```bash
-# Setup AOSP
-repo init -u https://github.com/circleos/manifest.git
-repo sync -j8
+# There is no github.com/circleos/manifest. The tree is upstream AOSP plus
+# the Circle overlay manifest; the full recipe is docs/REPO_MANIFEST.md and
+# the walk-through is aosplite/docs/TUTORIAL.md.
+aosplite/tools/init.sh ~/android android-16.0.0_r4
+curl -o ~/android/.repo/local_manifests/circle.xml \
+     https://raw.githubusercontent.com/bhengubv/CircleOS/main/manifests/circle.xml
+cd ~/android && repo sync -c -j$(nproc) --no-clone-bundle --prune
 
-# Build
-source build/envsetup.sh
-lunch circle_arm64-userdebug
-make -j$(nproc)
+# Build. bp4a is not optional - trunk_staging produces a pre-release image
+# that a released device refuses to boot.
+aosplite/tools/build.sh circle_arm64-bp4a-userdebug systemimage
+
+# Flash. Preflight always runs; a blocking result writes nothing.
+aosplite/tools/flash.sh --img out/target/product/generic_arm64/system.img \
+                        --vbmeta <vbmeta with flags=2> --serial <serial>
 ```
 
 ---
