@@ -1,8 +1,15 @@
 # Canonical architecture — what goes where, by what name
 
-> **State: verified against the live `.201` tree on 2026-06-26.** An earlier version of this
-> doc claimed the server services were "not yet written" — that was wrong, and is corrected
-> below. The naming conventions remain the contract for any NEW code: **match the names here.**
+> **State: verified against the working tree on 2026-09-15, Android 16
+> (`android-16.0.0_r4`).** The previous version was verified against `.201` on 2026-06-26,
+> when the base was Android 14. It said 9 server services, ~3,200 lines, and that security
+> and wallet were *not* server services. All three statements are now out of date — there
+> are 13, 5,525 lines, and both security and wallet are server services. Corrected below.
+>
+> The naming conventions remain the contract for any NEW code: **match the names here.**
+>
+> **Base moved 14 → 16.** These services were written against Android 14 and have not yet
+> been compiled against 16. Where the doc says a thing works, it means it worked on 14.
 
 ---
 
@@ -28,28 +35,52 @@ All live in `frameworks/base/services/core/java/com/circleos/server/<area>/`, co
 and must NOT be in `PRODUCT_PACKAGES`), and are started from `SystemServer.java`. Binder names
 come from `vendor/circle/sepolicy/service_contexts`.
 
-**Implemented + wired — 9 SystemServices (no stubs, ~3,200 lines total):**
+**13 SystemServices, 5,525 lines across 21 files.** Counted on 2026-09-15.
 
-| Service | Binder name | Lines |
-|---|---|---|
-| `privacy.CirclePrivacyManagerService` | `circle.privacy` (+ `circle_privacy`) | 238 |
-| `permission.CirclePermissionService` | `circle.permission` | 364 |
-| `update.CircleUpdateService` | `circle.update` | 358 |
-| `mesh.CircleMeshService` | `circle.mesh` | 494 |
-| `analytics.CircleAnalyticsService` | `circle.analytics` | 191 |
-| `camera.CircleCameraPrivacyService` | `circle.camera_privacy` | 145 |
-| `clipboard.CircleClipboardPrivacyService` | `circle.clipboard_privacy` | 142 |
-| `notification.CircleNotificationPrivacyService` | `circle.notification_privacy` | 148 |
-| `backup.CircleBackupService` | `circle.backup` | 327 |
+| Service | Binder name | Lines | sepolicy entry |
+|---|---|---|---|
+| `privacy.CirclePrivacyManagerService` | `circle.privacy` | 238 | yes |
+| `permission.CirclePermissionService` | `circle.permission` | 374 | yes |
+| `update.CircleUpdateService` | `circle.update` | 372 | yes |
+| `mesh.CircleMeshService` | `circle.mesh` | 797 | yes |
+| `analytics.CircleAnalyticsService` | `circle.analytics` | 195 | yes |
+| `camera.CircleCameraPrivacyService` | `circle.camera_privacy` | 149 | yes |
+| `clipboard.CircleClipboardPrivacyService` | `circle.clipboard_privacy` | 152 | yes |
+| `notification.CircleNotificationPrivacyService` | `circle.notification_privacy` | 156 | yes |
+| `backup.CircleBackupService` | `circle.backup` | 336 | yes |
+| `security.CircleSecurityService` | `circle.quarantine` | 223 | **MISSING** |
+| `wallet.ShongololoWalletService` | `circle.sdpkt` | 912 | **MISSING** |
+| `update.CrashReporter` | *(publishes no binder)* | 124 | n/a |
+| `update.DeviceEnrollment` | *(publishes no binder)* | 127 | n/a |
 
-Privacy starts FIRST (before THIRD_PARTY_APPS_CAN_START); Mesh last. Privacy helper classes
-(not SystemServices): `NetworkPermissionEnforcer` (256), `PrivacyDatabase` (252, SQLite),
-`ScopedContactsProvider` (233), `CircleAutoRevokeScheduler` (57).
+**Two gaps, found 2026-09-15 and not yet fixed.** `circle.quarantine` and `circle.sdpkt`
+publish binders that have no entry in `vendor/circle/sepolicy/service_contexts` — step 5 of
+the contract below. Registration will be denied by SELinux.
 
-**NOT present as server services (despite earlier docs):**
-- **Security engine** (`BehavioralSandbox`, `DataAcuityClient`, `FileDmzService`, `QuarantineManager`)
-  — no `com/circleos/server/security/` dir. The `vendor/circle/apps/TrafficLobby` app (local VPN +
-  DPI/DGA detection) covers part of this surface.
+`CrashReporter` and `DeviceEnrollment` extend `SystemService` but publish nothing. They are
+lifecycle hooks, not services; do not go looking for their binder names.
+
+Privacy starts FIRST (before THIRD_PARTY_APPS_CAN_START); Mesh last. Helper classes
+(not SystemServices): `NetworkPermissionEnforcer` (258), `PrivacyDatabase` (255, SQLite),
+`CircleAutoRevokeScheduler` (57), `MeshRouter` (163), `MeshLinkPrivacy` (155),
+`WalletFrame` (57), `WalletMath` (78), `CircleSystemPreferences` (347).
+
+`ScopedContactsProvider` (235) was listed here as a privacy helper. On 2026-09-15 it was
+moved to `vendor/circle/apps/CircleSettings/src/com/circleos/server/privacy/` because
+CircleSettings' manifest declares it as a `<provider>`, and Android instantiates a declared
+provider in the *app* process — with the class in `services.jar` the app died at startup with
+`RuntimeException: Unable to get provider ... at ActivityThread.installProvider`. Whether that
+is the right home on Android 16 is **unverified**; it is recorded here as a change, not a
+ruling.
+
+**Now present, contradicting the 2026-06-26 version of this doc:**
+- **Security** — `com/circleos/server/security/CircleSecurityService.java` exists and implements
+  `ICircleQuarantine`. The named classes (`BehavioralSandbox`, `DataAcuityClient`,
+  `FileDmzService`, `QuarantineManager`) still do not. The `vendor/circle/apps/TrafficLobby`
+  app (local VPN + DPI/DGA detection) covers part of this surface.
+- **Wallet** — `com/circleos/server/wallet/ShongololoWalletService.java`, 912 lines, the largest
+  single file in the tree. It holds keystore material inside `system_server`; that is a security
+  decision worth making deliberately rather than inheriting.
 - **Butler server engine** (`LlamaCppBackend`, `PersonalityManager`, `ContextDetector`) — Butler
   ships as a **vendor app** (`vendor/circle/apps/Butler`), not a system_server service.
 - **Titanium/Wallet server** (`SdpktTitanium` server, `SettlementQueue`) — ships as a **vendor app**
